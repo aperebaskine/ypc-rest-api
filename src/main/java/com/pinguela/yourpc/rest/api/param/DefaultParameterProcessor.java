@@ -1,4 +1,4 @@
-package com.pinguela.ypc.param;
+package com.pinguela.yourpc.rest.api.param;
 
 import java.util.Map.Entry;
 import java.util.function.Predicate;
@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.google.common.reflect.TypeToken;
+import com.pinguela.ypc.param.ErrorLog;
 
 public class DefaultParameterProcessor<T>
 extends ParameterProcessor<T> {
@@ -15,7 +16,7 @@ extends ParameterProcessor<T> {
 	}
 
 	@Override
-	public T process(MultivaluedMap<String, String> parameterMap) {
+	public T process(MultivaluedMap<String, String> parameterMap, ErrorLog errorLog) {
 		String valueStr = parameterMap.getFirst(getParameterName());
 		T value = ParameterParser.parse(valueStr, getParameterType());
 		

@@ -1,4 +1,4 @@
-package com.pinguela.ypc.param;
+package com.pinguela.yourpc.rest.api.param;
 
 public class ParameterPipeline<R> {
 	

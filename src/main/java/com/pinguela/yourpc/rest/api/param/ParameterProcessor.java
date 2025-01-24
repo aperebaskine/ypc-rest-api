@@ -1,4 +1,4 @@
-package com.pinguela.ypc.param;
+package com.pinguela.yourpc.rest.api.param;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,12 +8,13 @@ import java.util.function.Predicate;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.google.common.reflect.TypeToken;
+import com.pinguela.ypc.param.ErrorLog;
 
 public abstract class ParameterProcessor<T> {
 
 	private String parameterName;
 	private TypeToken<T> parameterType;
-	private boolean isRequired = false;
+	boolean isRequired = false;
 	private Map<Predicate<T>, String> validators;
 
 	protected ParameterProcessor(String parameterName, TypeToken<T> parameterType) {
@@ -27,7 +28,7 @@ public abstract class ParameterProcessor<T> {
 	}
 
 	public static <T> ParameterProcessor<T> of(String name, TypeToken<T> type) {
-		
+		return new DefaultParameterProcessor<>(name, type);
 	}
 
 	public static <T> ParameterProcessor<List<T>> multiValued(String name, Class<T> type) {
@@ -35,7 +36,7 @@ public abstract class ParameterProcessor<T> {
 	}
 	
 	public static <T> ParameterProcessor<List<T>> multiValued(String name, TypeToken<T> type) {
-		return new MultiValuedParameterProcessor();
+		return new MultiValuedParameterProcessor<>(name, type);
 	}
 	
 	public ParameterProcessor<T> required() {

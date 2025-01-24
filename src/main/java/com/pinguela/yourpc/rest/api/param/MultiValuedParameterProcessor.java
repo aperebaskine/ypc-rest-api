@@ -1,4 +1,4 @@
-package com.pinguela.ypc.param;
+package com.pinguela.yourpc.rest.api.param;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -10,6 +10,8 @@ import com.google.common.reflect.TypeToken;
 
 public class MultiValuedParameterProcessor<T>
 extends ParameterProcessor<List<T>> {
+	
+	private 
 
 	@SuppressWarnings("unchecked")
 	MultiValuedParameterProcessor(String parameterName, TypeToken<T> parameterType) {
@@ -32,6 +34,12 @@ extends ParameterProcessor<List<T>> {
 				return typeArguments;
 			}
 		}));
+	}
+	
+	@Override
+	public ParameterProcessor<List<T>> required() {
+		// TODO Auto-generated method stub
+		return super.required();
 	}
 	
 	@Override

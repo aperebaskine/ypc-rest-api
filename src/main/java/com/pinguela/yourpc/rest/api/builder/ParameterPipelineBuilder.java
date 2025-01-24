@@ -1,9 +1,11 @@
-package com.pinguela.ypc.param;
+package com.pinguela.yourpc.rest.api.builder;
 
 import java.util.LinkedList;
 import java.util.function.Function;
 
 import com.google.common.reflect.TypeToken;
+import com.pinguela.yourpc.rest.api.param.ParameterPipeline;
+import com.pinguela.ypc.param.processor.ParameterProcessor;
 
 public class ParameterPipelineBuilder<F, R> {
 
