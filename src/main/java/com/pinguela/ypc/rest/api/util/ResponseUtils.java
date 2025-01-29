@@ -30,7 +30,7 @@ public class ResponseUtils {
 		} catch (YPCException e) {
 			logger.error("Exception thrown while attempting to fetch data for response: {}",
 					e.getMessage(), e);
-			rb = Response.status(Status.INTERNAL_SERVER_ERROR);
+			rb = Response.status(Status.SERVICE_UNAVAILABLE);
 		}
 
 		return rb.build();
