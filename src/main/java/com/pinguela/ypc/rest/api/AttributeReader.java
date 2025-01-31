@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 
 public class AttributeReader implements MessageBodyReader<List<AttributeDTO<?>>> {
@@ -25,7 +26,10 @@ public class AttributeReader implements MessageBodyReader<List<AttributeDTO<?>>>
 			MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException {
 		
-		entityStream.
+		ObjectMapper mapper = new ObjectMapper();
+		
+		mapper.readValue(entityStream, mapper.getTypeFactory().constructCollectionType(List.class, AttributeDTO.class));
+		
 		// TODO Auto-generated method stub
 		return null;
 	}
