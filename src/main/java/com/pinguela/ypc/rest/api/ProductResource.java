@@ -3,21 +3,21 @@ package com.pinguela.ypc.rest.api;
 import java.util.Locale;
 
 import javax.validation.constraints.Min;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
 import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
-import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
+import com.pinguela.ypc.rest.api.constants.Parameters;
 import com.pinguela.ypc.rest.api.util.ResponseUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,30 +32,6 @@ public class ProductResource {
 
 	public ProductResource() {
 		this.productService = new ProductServiceImpl();
-	}
-
-	@GET
-	@Path("/{id}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(
-			method = "GET",
-			description = "Return full product data in all languages", 
-			responses = {
-					@ApiResponse(
-							responseCode = "200", 
-							description = "Successfully retrieved product data",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = ProductDTO.class)
-									)
-							), 
-					@ApiResponse(
-							responseCode = "404",
-							description = "Product not found"
-							)
-			})
-	public Response findById(@PathParam("id") @Min(1) Long id) {
-		return ResponseUtils.wrap(() -> productService.findById(id, Locale.forLanguageTag("en-GB")));
 	}
 
 	@GET
@@ -104,35 +80,14 @@ public class ProductResource {
 							)
 			})
 	public Response findBy(
-			@PathParam("locale") Locale locale,
-			/*@QueryParam("name") String name, 
-			@QueryParam("launchDateFrom") Date launchDateMin,
-			@QueryParam("launchDateTo") Date launchDateMax,
-			@QueryParam("stockMin") Integer stockMin,
-			@QueryParam("stockMax") Integer stockMax,
-			@QueryParam("priceMin") Double priceMin,
-			@QueryParam("priceMax") Double priceMax,
-			@QueryParam("categoryId") Short categoryId
-			 */
-			ProductCriteria criteria
+			@PathParam("locale") Locale locale, 
+			MultivaluedMap<String, String> parameters	 
 			) {
-
+		
+		ProductCriteria criteria = new ProductCriteria();
 		return ResponseUtils.wrap(() -> productService.findBy(criteria, locale, 0, 0));
 	}
 
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(
-			responses = {
-					@ApiResponse(responseCode = "200")})
-	public Response create(ProductDTO dto) {
-		return ResponseUtils.wrap(() -> {
-			Long id = productService.create(dto);
-			return productService.findById(id);
-		});
-	}
-	
 	private static class ProductResults extends Results<LocalizedProductDTO> {}
 
 }
