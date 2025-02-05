@@ -1,32 +1,46 @@
 package com.pinguela.ypc.rest.api;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
-import javax.validation.constraints.Min;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
+import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
+import com.pinguela.yourpc.model.constants.AttributeDataTypes;
+import com.pinguela.yourpc.model.constants.AttributeValueHandlingModes;
+import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
-import com.pinguela.ypc.rest.api.constants.Parameters;
+import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
 import com.pinguela.ypc.rest.api.util.ResponseUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.constraints.Min;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("/product")
 public class ProductResource {
+	
+	private static final Pattern ATTRIBUTE_PARAMETER_REGEX = Pattern.compile("attr\\.[A-Z]{3}\\.[0-9]+");
+	private static final AttributeRangeValidator RANGE_VALIDATOR = AttributeRangeValidator.getInstance();
 
 	private ProductService productService;
 
@@ -54,9 +68,9 @@ public class ProductResource {
 							description = "Product not found"
 							)
 			})
-	public Response findByIdLocalized(@PathParam("locale") Locale locale, 
+	public Response findByIdLocalized(@PathParam("locale") String locale, 
 			@PathParam("id") @Min(1) Long id) {
-		return ResponseUtils.wrap(() -> productService.findByIdLocalized(id, locale));
+		return ResponseUtils.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
 	}
 
 	@POST // Justificado por el tamaño de la URL por las búsqueda complejas por Atribute
@@ -80,12 +94,62 @@ public class ProductResource {
 							)
 			})
 	public Response findBy(
-			@PathParam("locale") Locale locale, 
+			@PathParam("locale") String locale, 
+			@QueryParam("name") String name, 
+			@QueryParam("launchDateFrom") Date launchDateMin,
+			@QueryParam("launchDateTo") Date launchDateMax,
+			@QueryParam("stockMin") Integer stockMin,
+			@QueryParam("stockMax") Integer stockMax,
+			@QueryParam("priceMin") Double priceMin,
+			@QueryParam("priceMax") Double priceMax,
+			@QueryParam("categoryId") Short categoryId,
 			MultivaluedMap<String, String> parameters	 
 			) {
 		
-		ProductCriteria criteria = new ProductCriteria();
-		return ResponseUtils.wrap(() -> productService.findBy(criteria, locale, 0, 0));
+		ProductCriteria criteria = new ProductCriteria(name, launchDateMin, launchDateMax, 
+				stockMin, stockMax, priceMin, priceMax, categoryId, buildAttributeCriteria(parameters, categoryId));
+		return ResponseUtils.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), 0, 0));
+	}
+	
+	private final List<AttributeDTO<?>> buildAttributeCriteria(MultivaluedMap<String, String> parameterMap, Short categoryId) {
+
+		List<AttributeDTO<?>> list = new ArrayList<AttributeDTO<?>>();
+
+		Iterator<String> attributeKeyIterator = 
+				parameterMap.keySet().stream().filter(t -> ATTRIBUTE_PARAMETER_REGEX.matcher(t).matches()).iterator();
+
+		while (attributeKeyIterator.hasNext()) {
+			String key = attributeKeyIterator.next();
+			String[] keyComponents = key.split("\\.");
+			String dataTypeIdentifier = keyComponents[1];
+
+			if (!AttributeDataTypes.isValidType(dataTypeIdentifier)) {
+				throw new WebApplicationException(Status.BAD_REQUEST);
+			}
+
+			AttributeDTO<?> dto = AttributeDTO.getInstance(dataTypeIdentifier);
+			dto.setId(Integer.valueOf(keyComponents[2]));
+
+			List<String> parameters = parameterMap.get(key);
+			for (String parameter : parameters) {
+				try {
+					dto.addValue(null, parameter);
+				} catch (IllegalArgumentException e) {
+					throw new WebApplicationException(Status.BAD_REQUEST);
+				}
+			}
+
+			try {
+				if (AttributeValueHandlingModes.RANGE != dto.getValueHandlingMode()
+						|| RANGE_VALIDATOR.validate(dto, categoryId)) {
+					list.add(dto);
+				}
+			} catch (YPCException e) {
+				throw new WebApplicationException(Status.BAD_REQUEST);
+			}
+		}
+
+		return list;
 	}
 
 	private static class ProductResults extends Results<LocalizedProductDTO> {}

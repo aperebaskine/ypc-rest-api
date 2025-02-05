@@ -3,10 +3,10 @@ package com.pinguela.ypc.rest.api.processing;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import com.pinguela.atomize.model.Validator;
 import com.pinguela.atomize.transform.BaseTransformer;
+
+import jakarta.ws.rs.core.MultivaluedMap;
 
 public class ParameterProcessor<T>
 extends BaseTransformer<MultivaluedMap<String, String>, String, T> {
