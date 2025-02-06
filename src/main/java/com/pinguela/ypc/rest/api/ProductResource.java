@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -31,14 +32,16 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
 
 @Path("/product")
 public class ProductResource {
-	
+
 	private static final Pattern ATTRIBUTE_PARAMETER_REGEX = Pattern.compile("attr\\.[A-Z]{3}\\.[0-9]+");
 	private static final AttributeRangeValidator RANGE_VALIDATOR = AttributeRangeValidator.getInstance();
 
@@ -103,15 +106,18 @@ public class ProductResource {
 			@QueryParam("priceMin") Double priceMin,
 			@QueryParam("priceMax") Double priceMax,
 			@QueryParam("categoryId") Short categoryId,
-			MultivaluedMap<String, String> parameters	 
+			@QueryParam("pos") @NotNull Integer pos,
+			@QueryParam("pageSize") @NotNull Integer pageSize,
+			@Context UriInfo uriInfo
 			) {
-		
+
+		MultivaluedMap<String, String> params = uriInfo.getQueryParameters();
 		ProductCriteria criteria = new ProductCriteria(name, launchDateMin, launchDateMax, 
-				stockMin, stockMax, priceMin, priceMax, categoryId, buildAttributeCriteria(parameters, categoryId));
-		return ResponseUtils.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), 0, 0));
+				stockMin, stockMax, priceMin, priceMax, categoryId, buildAttributeCriteria(params, categoryId));
+		return ResponseUtils.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), pos, pageSize));
 	}
-	
-	private final List<AttributeDTO<?>> buildAttributeCriteria(MultivaluedMap<String, String> parameterMap, Short categoryId) {
+
+	private static List<AttributeDTO<?>> buildAttributeCriteria(MultivaluedMap<String, String> parameterMap, Short categoryId) {
 
 		List<AttributeDTO<?>> list = new ArrayList<AttributeDTO<?>>();
 

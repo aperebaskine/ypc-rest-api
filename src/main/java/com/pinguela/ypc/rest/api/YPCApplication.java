@@ -17,6 +17,8 @@ public class YPCApplication extends ResourceConfig {
 	public YPCApplication() {
 		packages(YPCApplication.class.getPackage().getName());
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
+		
+		register(AttributeMapperContextResolver.class);
 	}
 
 }
