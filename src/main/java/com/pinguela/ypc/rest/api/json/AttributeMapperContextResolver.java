@@ -1,8 +1,10 @@
 package com.pinguela.ypc.rest.api.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.pinguela.rest.api.mixin.AttributeDTOMixin;
+import com.pinguela.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
+import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
 
 import jakarta.ws.rs.ext.ContextResolver;
 
@@ -14,12 +16,8 @@ implements ContextResolver<ObjectMapper> {
 	public AttributeMapperContextResolver() {
 		mapper = new ObjectMapper();
 
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(new AttributeSerializer());
-		module.addSerializer(new AttributeMapSerializer());
-		module.addDeserializer(AttributeDTO.class, new AttributeDeserializer());
-
-		mapper.registerModule(module);
+		mapper.addMixIn(AttributeDTO.class, AttributeDTOMixin.class);
+		mapper.addMixIn(LocalizedProductDTO.class, ProductDTOMixin.class);
 	}
 
 	@Override
