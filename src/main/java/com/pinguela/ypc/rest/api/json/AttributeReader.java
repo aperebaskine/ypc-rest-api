@@ -1,4 +1,4 @@
-package com.pinguela.ypc.rest.api;
+package com.pinguela.ypc.rest.api.json;
 
 import java.io.IOException;
 import java.io.InputStream;
