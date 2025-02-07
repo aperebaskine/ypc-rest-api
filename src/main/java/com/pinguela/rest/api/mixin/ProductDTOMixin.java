@@ -5,8 +5,11 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
+import com.pinguela.ypc.rest.api.json.MapToValueArraySerializer;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "Product")
@@ -48,7 +51,9 @@ public abstract class ProductDTOMixin {
 	@JsonIgnore
 	private String replacementName;
 
-	@JsonIgnore
-	private Map<String, AttributeDTO<?>> attributes;
+	@JsonProperty
+	@JsonSerialize(using = MapToValueArraySerializer.class)
+	@ArraySchema(schema = @Schema(implementation = AttributeDTOMixin.class))
+	abstract Map<String, AttributeDTO<?>> getAttributes();
 
 }
