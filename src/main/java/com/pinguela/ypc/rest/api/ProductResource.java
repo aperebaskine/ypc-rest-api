@@ -8,12 +8,12 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.pinguela.YPCException;
+import com.pinguela.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
 import com.pinguela.yourpc.model.constants.AttributeDataTypes;
 import com.pinguela.yourpc.model.constants.AttributeValueHandlingModes;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
-import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
 import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
@@ -63,7 +63,7 @@ public class ProductResource {
 							description = "Successfully retrieved product data",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = LocalizedProductDTO.class)
+									schema = @Schema(implementation = ProductDTOMixin.class)
 									)
 							), 
 					@ApiResponse(
@@ -158,6 +158,6 @@ public class ProductResource {
 		return list;
 	}
 
-	private static class ProductResults extends Results<LocalizedProductDTO> {}
+	private static class ProductResults extends Results<ProductDTOMixin> {}
 
 }
