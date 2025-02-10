@@ -58,5 +58,7 @@ public abstract class ProductDTOMixin {
 	@JsonDeserialize(using = AttributeMapDeserializer.class)
 	@ArraySchema(schema = @Schema(implementation = AttributeDTOMixin.class))
 	private Map<String, AttributeDTO<?>> attributes;
+	
+	private ProductDTOMixin() {}
 
 }

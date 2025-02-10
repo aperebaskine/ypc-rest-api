@@ -34,5 +34,7 @@ public abstract class AttributeDTOMixin {
 
 	@JsonIgnore
 	abstract Class<?> getTypeParameterClass();
+	
+	private AttributeDTOMixin() {}
 
 }
