@@ -1,4 +1,4 @@
-package com.pinguela.rest.api.mixin;
+package com.pinguela.ypc.rest.api.mixin;
 
 import java.util.List;
 

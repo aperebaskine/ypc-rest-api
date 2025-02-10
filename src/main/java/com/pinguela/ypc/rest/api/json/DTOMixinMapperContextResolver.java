@@ -1,10 +1,10 @@
 package com.pinguela.ypc.rest.api.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pinguela.rest.api.mixin.AttributeDTOMixin;
-import com.pinguela.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
+import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
+import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
 
 import jakarta.ws.rs.ext.ContextResolver;
 

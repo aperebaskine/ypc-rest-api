@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.pinguela.YPCException;
-import com.pinguela.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
 import com.pinguela.yourpc.model.constants.AttributeDataTypes;
@@ -16,6 +15,7 @@ import com.pinguela.yourpc.model.constants.AttributeValueHandlingModes;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
+import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
 import com.pinguela.ypc.rest.api.util.ResponseUtils;
 
