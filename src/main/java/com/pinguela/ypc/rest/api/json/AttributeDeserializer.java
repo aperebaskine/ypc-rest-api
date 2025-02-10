@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
+import com.pinguela.ypc.rest.api.constants.AttributeJsonTypes;
 
 @SuppressWarnings("serial")
 public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
@@ -22,7 +23,8 @@ public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
 			throws IOException, JacksonException {
 
 		JsonNode root = (JsonNode) p.readValueAsTree();
-		String dataType = root.get("dataType").asText();
+		String jsonType = root.get("dataType").asText();
+		String dataType = AttributeJsonTypes.getDataType(jsonType);
 
 		AttributeDTO<?> dto = AttributeDTO.getInstance(dataType);
 		dto.setId(root.get("id").asInt());
@@ -32,7 +34,7 @@ public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
 			JsonNode value = values.next();
 			dto.addValue(
 					value.get("id").asLong(),
-					value.get("").traverse(p.getCodec())
+					value.get("value").traverse(p.getCodec())
 					.readValueAs(dto.getTypeParameterClass())
 					);
 		}
