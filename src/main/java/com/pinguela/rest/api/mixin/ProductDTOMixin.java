@@ -5,8 +5,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
+import com.pinguela.ypc.rest.api.json.AttributeMapDeserializer;
 import com.pinguela.ypc.rest.api.json.MapToValueArraySerializer;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -53,6 +55,7 @@ public abstract class ProductDTOMixin {
 
 	@JsonProperty
 	@JsonSerialize(using = MapToValueArraySerializer.class)
+	@JsonDeserialize(using = AttributeMapDeserializer.class)
 	@ArraySchema(schema = @Schema(implementation = AttributeDTOMixin.class))
 	private Map<String, AttributeDTO<?>> attributes;
 
