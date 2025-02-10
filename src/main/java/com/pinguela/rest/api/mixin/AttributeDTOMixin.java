@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pinguela.yourpc.model.dto.AttributeValueDTO;
+import com.pinguela.ypc.rest.api.json.AttributeDataTypeSerializer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -18,6 +20,7 @@ public abstract class AttributeDTOMixin {
 	private String name;
 
 	@JsonProperty("dataType")
+	@JsonSerialize(using = AttributeDataTypeSerializer.class)
 	abstract String getDataTypeIdentifier();
 
 	@JsonProperty
