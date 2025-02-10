@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
-import com.pinguela.ypc.rest.api.json.AttributeMapDeserializer;
-import com.pinguela.ypc.rest.api.json.MapToValueArraySerializer;
+import com.pinguela.ypc.rest.api.json.serialize.AttributeMapDeserializer;
+import com.pinguela.ypc.rest.api.json.serialize.MapToValueArraySerializer;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;

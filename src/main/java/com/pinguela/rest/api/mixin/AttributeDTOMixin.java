@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pinguela.yourpc.model.dto.AttributeValueDTO;
-import com.pinguela.ypc.rest.api.json.AttributeDataTypeSerializer;
+import com.pinguela.ypc.rest.api.json.serialize.AttributeDataTypeSerializer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,4 +1,4 @@
-package com.pinguela.ypc.rest.api.json;
+package com.pinguela.ypc.rest.api.json.serialize;
 
 import java.util.TreeMap;
 
