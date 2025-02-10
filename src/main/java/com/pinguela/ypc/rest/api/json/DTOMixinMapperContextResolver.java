@@ -8,12 +8,12 @@ import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
 
 import jakarta.ws.rs.ext.ContextResolver;
 
-public class DTOMapperContextResolver 
+public class DTOMixinMapperContextResolver 
 implements ContextResolver<ObjectMapper> {
 
 	private final ObjectMapper mapper;
 
-	public DTOMapperContextResolver() {
+	public DTOMixinMapperContextResolver() {
 		mapper = new ObjectMapper();
 
 		mapper.addMixIn(AttributeDTO.class, AttributeDTOMixin.class);
@@ -22,7 +22,10 @@ implements ContextResolver<ObjectMapper> {
 
 	@Override
 	public ObjectMapper getContext(Class<?> type) {
-		return mapper;
+		if (mapper.findMixInClassFor(type) != null) {
+			return mapper;
+		}
+		return null;
 	}
 
 }
