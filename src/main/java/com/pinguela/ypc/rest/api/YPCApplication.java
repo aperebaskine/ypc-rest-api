@@ -2,7 +2,7 @@ package com.pinguela.ypc.rest.api;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-import com.pinguela.ypc.rest.api.json.AttributeMapperContextResolver;
+import com.pinguela.ypc.rest.api.json.DTOMapperContextResolver;
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -24,7 +24,7 @@ public class YPCApplication extends ResourceConfig {
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
 		
-		register(AttributeMapperContextResolver.class);
+		register(DTOMapperContextResolver.class);
 	}
 
 }

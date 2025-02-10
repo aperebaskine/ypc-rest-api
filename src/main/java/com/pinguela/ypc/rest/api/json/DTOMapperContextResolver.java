@@ -8,12 +8,12 @@ import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
 
 import jakarta.ws.rs.ext.ContextResolver;
 
-public class AttributeMapperContextResolver 
+public class DTOMapperContextResolver 
 implements ContextResolver<ObjectMapper> {
 
 	private final ObjectMapper mapper;
 
-	public AttributeMapperContextResolver() {
+	public DTOMapperContextResolver() {
 		mapper = new ObjectMapper();
 
 		mapper.addMixIn(AttributeDTO.class, AttributeDTOMixin.class);
