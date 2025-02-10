@@ -54,6 +54,6 @@ public abstract class ProductDTOMixin {
 	@JsonProperty
 	@JsonSerialize(using = MapToValueArraySerializer.class)
 	@ArraySchema(schema = @Schema(implementation = AttributeDTOMixin.class))
-	abstract Map<String, AttributeDTO<?>> getAttributes();
+	private Map<String, AttributeDTO<?>> attributes;
 
 }
