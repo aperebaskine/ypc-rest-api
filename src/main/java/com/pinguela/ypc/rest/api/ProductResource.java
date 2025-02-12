@@ -20,13 +20,14 @@ import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
 import com.pinguela.ypc.rest.api.util.ResponseUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -76,8 +77,9 @@ public class ProductResource {
 		return ResponseUtils.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
 	}
 
-	@POST // Justificado por el tamaño de la URL por las búsqueda complejas por Atribute
+	@GET // Justificado por el tamaño de la URL por las búsqueda complejas por Atribute
 	@Path("/{locale}/search")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -108,6 +110,13 @@ public class ProductResource {
 			@QueryParam("categoryId") Short categoryId,
 			@QueryParam("pos") @NotNull Integer pos,
 			@QueryParam("pageSize") @NotNull Integer pageSize,
+			@QueryParam("attributes") 
+			@ArraySchema(
+					schema = @Schema(
+							description = "Representation of an attribute by its ID and a list of values, each of which can be represented by its ID or value. For know atrtribute se /cat",
+							example = "id:2,vals:[id:123,val:2000,id:456]")
+					) 
+			List<String> attributes,
 			@Context UriInfo uriInfo
 			) {
 
