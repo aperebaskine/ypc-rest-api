@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pinguela.yourpc.model.dto.AttributeValueDTO;
 import com.pinguela.ypc.rest.api.json.serialize.AttributeDataTypeSerializer;
+import com.pinguela.ypc.rest.api.json.serialize.AttributeHandlingModeSerializer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -29,7 +30,8 @@ public abstract class AttributeDTOMixin {
 	@JsonIgnore
 	abstract List<AttributeValueDTO<?>> getValuesByHandlingMode();
 
-	@JsonIgnore
+	@JsonProperty("handlingMode")
+	@JsonSerialize(using = AttributeHandlingModeSerializer.class)
 	abstract Integer getValueHandlingMode();
 
 	@JsonIgnore
