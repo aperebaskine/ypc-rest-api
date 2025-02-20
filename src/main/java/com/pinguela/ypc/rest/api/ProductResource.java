@@ -7,27 +7,35 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
 import com.pinguela.yourpc.model.constants.AttributeDataTypes;
 import com.pinguela.yourpc.model.constants.AttributeValueHandlingModes;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
+import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
+import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
-import com.pinguela.ypc.rest.api.util.ResponseUtils;
+import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -42,6 +50,8 @@ import jakarta.ws.rs.core.UriInfo;
 
 @Path("/product")
 public class ProductResource {
+
+	private static Logger logger = LogManager.getLogger(ProductResource.class);
 
 	private static final Pattern ATTRIBUTE_PARAMETER_REGEX = Pattern.compile("attr\\.[A-Z]{3}\\.[0-9]+");
 	private static final AttributeRangeValidator RANGE_VALIDATOR = AttributeRangeValidator.getInstance();
@@ -72,13 +82,33 @@ public class ProductResource {
 							description = "Product not found"
 							)
 			})
-	public Response findByIdLocalized(@PathParam("locale") String locale, 
+	public Response findById(@PathParam("locale") String locale, 
 			@PathParam("id") @Min(1) Long id) {
-		return ResponseUtils.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
+		return ResponseWrapper.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
+	}
+	
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response create(@BeanParam ProductDTO dto) {
+
+		Long id = null;
+
+		try {
+			id = productService.create(dto);
+		} catch (YPCException e) {
+			logger.error("Error while inserting Product into database: {}", dto, e);
+		}
+
+		if (id == null) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		dto.setId(id);
+		return Response.ok(dto).build();
 	}
 
-	@GET // Justificado por el tamaño de la URL por las búsqueda complejas por Atribute
-	@Path("/{locale}/search")
+	@GET
+	@Path("/{locale}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
@@ -110,12 +140,15 @@ public class ProductResource {
 			@QueryParam("categoryId") Short categoryId,
 			@QueryParam("pos") @NotNull Integer pos,
 			@QueryParam("pageSize") @NotNull Integer pageSize,
-			@QueryParam("attributes") 
+			@QueryParam("attributes")
 			@ArraySchema(
-					schema = @Schema(
-							description = "Representation of an attribute by its ID and a list of values, each of which can be represented by its ID or value. For know atrtribute se /cat",
-							example = "id:2,vals:[id:123,val:2000,id:456]")
-					) 
+					schema = @Schema(implementation = LightAttributeDTOMixin.class)
+					)
+			@Parameter(
+					description = "List of attribute criteria, represented by an ID and list of values."
+							+ " Values should contain only their ID when searching within a set of values, or their value when searching within a range of values.",
+							example = "['id:2, values:[value:2600, value:5500]', 'id:45, values:[id:123, id:456]']"
+					)
 			List<String> attributes,
 			@Context UriInfo uriInfo
 			) {
@@ -123,7 +156,7 @@ public class ProductResource {
 		MultivaluedMap<String, String> params = uriInfo.getQueryParameters();
 		ProductCriteria criteria = new ProductCriteria(name, launchDateMin, launchDateMax, 
 				stockMin, stockMax, priceMin, priceMax, categoryId, buildAttributeCriteria(params, categoryId));
-		return ResponseUtils.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), pos, pageSize));
+		return ResponseWrapper.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), pos, pageSize));
 	}
 
 	private static List<AttributeDTO<?>> buildAttributeCriteria(MultivaluedMap<String, String> parameterMap, Short categoryId) {
