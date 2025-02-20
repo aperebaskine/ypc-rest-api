@@ -1,6 +1,7 @@
 package com.pinguela.ypc.rest.api.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pinguela.yourpc.model.dto.AbstractDTO;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
 import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
@@ -22,9 +23,20 @@ implements ContextResolver<ObjectMapper> {
 
 	@Override
 	public ObjectMapper getContext(Class<?> type) {
-		if (mapper.findMixInClassFor(type) != null) {
-			return mapper;
+		
+		if (!AbstractDTO.class.isAssignableFrom(type)) {
+			return null;
 		}
+		
+		Class<?> current = type;
+		
+		while (!Object.class.equals(current)) {
+			if (mapper.findMixInClassFor(current) != null) {
+				return mapper;
+			}
+			current = current.getSuperclass();
+		}
+		
 		return null;
 	}
 
