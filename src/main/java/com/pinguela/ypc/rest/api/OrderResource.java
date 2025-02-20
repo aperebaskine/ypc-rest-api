@@ -7,7 +7,7 @@ import com.pinguela.yourpc.model.CustomerOrderCriteria;
 import com.pinguela.yourpc.service.CustomerOrderService;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
-import com.pinguela.ypc.rest.api.util.ResponseUtils;
+import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
@@ -31,7 +31,7 @@ public class OrderResource {
 	public Response findById(
 			@PathParam("locale") String locale,
 			@PathParam("id") Long id) {
-		return ResponseUtils.wrap(() -> orderService.findById(id, LocaleUtils.getLocale(locale)));
+		return ResponseWrapper.wrap(() -> orderService.findById(id, LocaleUtils.getLocale(locale)));
 	}
 	
 	@GET
@@ -49,13 +49,13 @@ public class OrderResource {
 		Locale l = LocaleUtils.getLocale(locale);
 		
 		if (customerId != null) {
-			return ResponseUtils.wrap(() -> orderService.findByCustomer(customerId, l));
+			return ResponseWrapper.wrap(() -> orderService.findByCustomer(customerId, l));
 		}
 		
 		CustomerOrderCriteria criteria = new CustomerOrderCriteria(customerId, customerEmail, 
 				minAmount, maxAmount, minDate, maxDate, state);
 		
-		return ResponseUtils.wrap(() -> orderService.findBy(criteria, l));
+		return ResponseWrapper.wrap(() -> orderService.findBy(criteria, l));
 	}
 	
 	@GET
@@ -72,7 +72,7 @@ public class OrderResource {
 		CustomerOrderCriteria criteria = new CustomerOrderCriteria(customerId, customerEmail, 
 				minAmount, maxAmount, minDate, maxDate, state);
 		
-		return ResponseUtils.wrap(() -> orderService.getRanges(criteria));
+		return ResponseWrapper.wrap(() -> orderService.getRanges(criteria));
 	}
 	
 	
