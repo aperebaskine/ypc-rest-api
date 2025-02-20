@@ -18,7 +18,7 @@ import com.pinguela.ServiceException;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.service.AttributeService;
 import com.pinguela.yourpc.service.impl.AttributeServiceImpl;
-import com.pinguela.ypc.rest.api.constants.AttributeJsonTypes;
+import com.pinguela.ypc.rest.api.constants.AttributeJsonMappings;
 
 @SuppressWarnings("serial")
 public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
@@ -43,10 +43,11 @@ public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
 		
 		JsonNode dataTypeNode = root.get("dataType");
 		String dataType;
+		
 		try {
 			dataType = dataTypeNode == null ? 
 					attributeService.findById(id, Locale.forLanguageTag("en-GB"), false, null).getDataTypeIdentifier() :
-					AttributeJsonTypes.getDataType(dataTypeNode.asText());
+					AttributeJsonMappings.getDataType(dataTypeNode.asText());
 		} catch (ServiceException | DataException e) {
 			String errorMsg = String.format("Exception thrown while fetching attribute data: %s", e.getMessage());
 			logger.error(errorMsg, e);
