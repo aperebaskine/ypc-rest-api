@@ -67,6 +67,7 @@ public class ProductResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
+			operationId = "findProductById",
 			description = "Return product data in the specified language", 
 			responses = {
 					@ApiResponse(
@@ -113,6 +114,7 @@ public class ProductResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
+			operationId = "findProductBy",
 			description = "Return a list of products", 
 			responses = {
 					@ApiResponse(
