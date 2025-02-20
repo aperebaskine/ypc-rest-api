@@ -2,7 +2,6 @@ package com.pinguela.ypc.rest.api;
 
 import java.util.Locale;
 
-import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.service.AttributeService;
 import com.pinguela.yourpc.service.impl.AttributeServiceImpl;
 import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
@@ -34,13 +33,14 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}/{id: ^\\d$}")
+	@Path("/{locale}/{id:^\\d$}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
 			operationId = "findAttributeById",
 			description = "Find data for an attribute by its ID.\n"
-					+ "Optionally return values that haven't been assigned to products.",
+					+ "Optionally return values that haven't been assigned to products,"
+					+ "or filter values that have been assigned to a specific category of products.",
 					responses = {
 							@ApiResponse(
 									responseCode = "200", 
@@ -72,7 +72,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}")
+	@Path("/{locale}/{name:[^(^\\d$)]}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -94,6 +94,10 @@ public class AttributeResource {
 							@ApiResponse(
 									responseCode = "400",
 									description = "Error in received parameters"
+									),
+							@ApiResponse(
+									responseCode = "404",
+									description = "No attribute found with the specified name and locale."
 									)
 			})
 	public Response findByName(
@@ -103,9 +107,9 @@ public class AttributeResource {
 			@QueryParam("unassignedValues") @DefaultValue("false") Boolean unassignedValues
 			) {
 		Locale l = Locale.forLanguageTag(locale);
-		return ResponseWrapper.wrap(() -> name == null ?
-				attributeService.findByCategory(categoryId, l, unassignedValues) :
-					new AttributeDTO<?>[] {attributeService.findByName(name, l, unassignedValues, categoryId)}
+		return ResponseWrapper.wrap(
+				() -> attributeService.findByName(name, l, unassignedValues, categoryId), 
+				Status.NOT_FOUND
 				);
 	}
 
@@ -132,10 +136,6 @@ public class AttributeResource {
 							@ApiResponse(
 									responseCode = "400",
 									description = "Error in received parameters"
-									),
-							@ApiResponse(
-									responseCode = "404",
-									description = "No attribute found with the specified name and locale."
 									)
 			})
 	public Response findByCategory(
@@ -145,7 +145,7 @@ public class AttributeResource {
 			) {
 		Locale l = Locale.forLanguageTag(locale);
 		return ResponseWrapper.wrap(() -> 
-				attributeService.findByCategory(categoryId, l, unassignedValues)
+		attributeService.findByCategory(categoryId, l, unassignedValues)
 				);
 	}
 
