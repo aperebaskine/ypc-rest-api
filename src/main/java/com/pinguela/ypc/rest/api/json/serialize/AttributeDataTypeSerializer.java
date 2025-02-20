@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.pinguela.ypc.rest.api.constants.AttributeJsonTypes;
+import com.pinguela.ypc.rest.api.constants.AttributeJsonMappings;
 
 @SuppressWarnings("serial")
 public class AttributeDataTypeSerializer extends StdSerializer<String> {
@@ -16,7 +16,7 @@ public class AttributeDataTypeSerializer extends StdSerializer<String> {
 
 	@Override
 	public void serialize(String value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-		gen.writeString(AttributeJsonTypes.getJsonType(value));
+		gen.writeString(AttributeJsonMappings.getJsonType(value));
 	}
 
 }
