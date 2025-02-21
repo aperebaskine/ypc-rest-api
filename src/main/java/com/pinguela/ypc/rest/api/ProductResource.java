@@ -35,7 +35,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -88,8 +87,6 @@ public class ProductResource {
 		return ResponseWrapper.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
 	}
 	
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(@BeanParam ProductDTO dto) {
 
 		Long id = null;
