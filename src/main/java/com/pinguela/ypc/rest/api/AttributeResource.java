@@ -101,7 +101,7 @@ public class AttributeResource {
 			})
 	public Response findByName(
 			@PathParam("locale") String locale,
-			@QueryParam("name") String name,
+			@PathParam("name") String name,
 			@QueryParam("categoryId") Short categoryId,
 			@QueryParam("unassignedValues") @DefaultValue("false") Boolean unassignedValues
 			) {
