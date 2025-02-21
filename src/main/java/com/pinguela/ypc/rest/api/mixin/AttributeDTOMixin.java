@@ -30,6 +30,7 @@ public abstract class AttributeDTOMixin {
 	@JsonIgnore
 	abstract List<AttributeValueDTO<?>> getValuesByHandlingMode();
 
+	@Schema(type = "string")
 	@JsonProperty("handlingMode")
 	@JsonSerialize(using = AttributeHandlingModeSerializer.class)
 	abstract Integer getValueHandlingMode();
