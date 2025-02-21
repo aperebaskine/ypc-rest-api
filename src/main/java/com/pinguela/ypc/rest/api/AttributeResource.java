@@ -5,6 +5,7 @@ import java.util.Locale;
 import com.pinguela.yourpc.service.AttributeService;
 import com.pinguela.yourpc.service.impl.AttributeServiceImpl;
 import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
+import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +34,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}/{id:^\\d$}")
+	@Path("/{locale}/{id:\\d+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -66,13 +67,13 @@ public class AttributeResource {
 			@QueryParam("unassignedValues") @DefaultValue("false") Boolean unassignedValues
 			) {
 		return ResponseWrapper.wrap(
-				() -> attributeService.findById(id, Locale.forLanguageTag(locale), unassignedValues, categoryId), 
+				() -> attributeService.findById(id, LocaleUtils.getLocale(locale), unassignedValues, categoryId), 
 				Status.NOT_FOUND
 				);
 	}
 
 	@GET
-	@Path("/{locale}/{name:[^(^\\d$)]}")
+	@Path("/{locale}/{name}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -86,9 +87,7 @@ public class AttributeResource {
 									description = "Successfully retrieved attribute data",
 									content = @Content(
 											mediaType = "application/json",
-											array = @ArraySchema(
-													schema = @Schema(implementation = AttributeDTOMixin.class)
-													)
+											schema = @Schema(implementation = AttributeDTOMixin.class)
 											)
 									), 
 							@ApiResponse(
@@ -145,7 +144,7 @@ public class AttributeResource {
 			) {
 		Locale l = Locale.forLanguageTag(locale);
 		return ResponseWrapper.wrap(() -> 
-		attributeService.findByCategory(categoryId, l, unassignedValues)
+		attributeService.findByCategory(categoryId, l, unassignedValues).values()
 				);
 	}
 
