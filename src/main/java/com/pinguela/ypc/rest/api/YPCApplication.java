@@ -18,8 +18,7 @@ import jakarta.ws.rs.ApplicationPath;
 				),
 		servers = {
 				@Server(url = "http://localhost:8080/ypc-rest-api/", description = "REST API Server for YPC")
-		}
-		)
+		})
 @ApplicationPath("/api")
 public class YPCApplication extends ResourceConfig {
 
