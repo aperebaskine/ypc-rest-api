@@ -7,12 +7,17 @@ import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 import jakarta.ws.rs.ApplicationPath;
 
 @OpenAPIDefinition(
+		info = @Info(
+				title = "ypc-rest-api",
+				version = "0.0.1"
+				),
 		servers = {
-				@Server(url = "http://localhost:8080/ypc-rest-api/", description = "REST API SERVER")
+				@Server(url = "http://localhost:8080/ypc-rest-api/", description = "REST API Server for YPC")
 		}
 		)
 @ApplicationPath("/api")
@@ -20,10 +25,11 @@ public class YPCApplication extends ResourceConfig {
 
 	public YPCApplication() {
 		packages(YPCApplication.class.getPackage().getName());
-		
+
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
+
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
-		
+
 		register(ObjectMapperContextResolver.class);
 	}
 
