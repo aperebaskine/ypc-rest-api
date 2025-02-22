@@ -1,6 +1,10 @@
 package com.pinguela.ypc.rest.api.util;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.apache.commons.lang3.function.FailableSupplier;
+import org.apache.commons.validator.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +35,7 @@ public class ResponseWrapper {
 		try {
 			o = serviceCaller.get();
 			
-			if (o == null) {
+			if (isNullOrEmpty(o)) {
 				rb = Response.status(onNull);
 			} else {
 				rb = Response.ok(o);
@@ -48,6 +52,29 @@ public class ResponseWrapper {
 		}
 
 		return rb.build();
+	}
+	
+	// TODO: Implement a strategy pattern here
+	private static boolean isNullOrEmpty(Object object) {
+		
+		if (object == null) {
+			return true;
+		}
+		
+		if (object instanceof String) {
+			return GenericValidator.isBlankOrNull((String) object);
+		}
+		
+		if (object instanceof Collection) {
+			return ((Collection<?>) object).isEmpty();
+		} 
+		
+		if (object instanceof Map) {
+			return ((Map<?, ?>) object).isEmpty();
+		}
+		
+		return false;
+		
 	}
 
 }
