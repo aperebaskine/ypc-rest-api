@@ -26,10 +26,13 @@ public class YPCApplication extends ResourceConfig {
 	public YPCApplication() {
 		packages(YPCApplication.class.getPackage().getName());
 
+		// Swagger UI openapi.json resource
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
 
+		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
 
+		// Jackson object mapper for serialization
 		register(ObjectMapperContextResolver.class);
 	}
 
