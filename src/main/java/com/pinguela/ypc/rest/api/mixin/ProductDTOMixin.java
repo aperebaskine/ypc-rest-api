@@ -18,33 +18,40 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public abstract class ProductDTOMixin {
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private Long id;
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private Short categoryId;
 
 	@JsonIgnore
 	private String category;
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private String name;
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private String description;
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private Date launchDate;
 
 	@JsonIgnore
 	private Date discontinuationDate;
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private Integer stock;
 
 	@JsonIgnore
 	private Double purchasePrice;
 
 	@JsonProperty
+	@Schema(nullable = false)
 	private Double salePrice;
 
 	@JsonProperty
