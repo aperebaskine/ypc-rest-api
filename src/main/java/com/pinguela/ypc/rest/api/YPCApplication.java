@@ -2,6 +2,7 @@ package com.pinguela.ypc.rest.api;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
+import com.pinguela.ypc.rest.api.filter.CORSFilter;
 import com.pinguela.ypc.rest.api.json.ObjectMapperContextResolver;
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
@@ -23,7 +24,11 @@ import jakarta.ws.rs.ApplicationPath;
 public class YPCApplication extends ResourceConfig {
 
 	public YPCApplication() {
+		// Resource package
 		packages(YPCApplication.class.getPackage().getName());
+		
+		// Filter package
+		packages(CORSFilter.class.getPackage().getName());
 
 		// Swagger UI openapi.json resource
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
