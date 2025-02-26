@@ -13,22 +13,20 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.pinguela.DataException;
-import com.pinguela.ServiceException;
+import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.service.AttributeService;
 import com.pinguela.yourpc.service.impl.AttributeServiceImpl;
-import com.pinguela.ypc.rest.api.constants.AttributeJsonMappings;
 
 @SuppressWarnings("serial")
-public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
-	
-	private static Logger logger = LogManager.getLogger(AttributeDeserializer.class);
-	
+public class LightAttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
+
+	private static Logger logger = LogManager.getLogger(LightAttributeDeserializer.class);
+
 	// TODO: Cache values
 	private AttributeService attributeService;
 
-	public AttributeDeserializer() {
+	public LightAttributeDeserializer() {
 		super(AttributeDTO.class);
 		this.attributeService = new AttributeServiceImpl();
 	}
@@ -38,30 +36,29 @@ public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
 			throws IOException, JacksonException {
 
 		JsonNode root = (JsonNode) p.readValueAsTree();
-		
+
 		Integer id = root.get("id").asInt();
-		
-		JsonNode dataTypeNode = root.get("dataType");
 		String dataType;
-		
+
 		try {
-			dataType = dataTypeNode == null ? 
-					attributeService.findById(id, Locale.forLanguageTag("en-GB"), false, null).getDataTypeIdentifier() :
-					AttributeJsonMappings.getDataType(dataTypeNode.asText());
-		} catch (ServiceException | DataException e) {
-			String errorMsg = String.format("Exception thrown while fetching attribute data: %s", e.getMessage());
+			dataType = findDataType(id);
+		} catch (YPCException e) {
+			String errorMsg = String.format(
+					"Exception thrown while fetching attribute data: %s", 
+					e.getMessage()
+					);
 			logger.error(errorMsg, e);
 			throw new JsonMappingException(p, errorMsg);
 		}
 
 		AttributeDTO<?> dto = AttributeDTO.getInstance(dataType);
-		dto.setId(root.get("id").asInt());
+		dto.setId(id);
 
 		Iterator<JsonNode> values = root.get("values").elements();
 		while (values.hasNext()) {
 			JsonNode value = values.next();
 			dto.addValue(
-					value.get("id").asLong(),
+					null,
 					value.get("value").traverse(p.getCodec())
 					.readValueAs(dto.getTypeParameterClass())
 					);
@@ -70,4 +67,11 @@ public class AttributeDeserializer extends StdDeserializer<AttributeDTO<?>> {
 		return dto;
 	}
 
+	private String findDataType(Integer id) throws YPCException {
+		return attributeService
+				.findById(id, Locale.forLanguageTag("en-GB"), false, null)
+				.getDataTypeIdentifier();
+	}
+
 }
+
