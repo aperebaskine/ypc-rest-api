@@ -1,8 +1,6 @@
 package com.pinguela.ypc.rest.api;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -13,8 +11,6 @@ import org.apache.logging.log4j.Logger;
 import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
-import com.pinguela.yourpc.model.constants.AttributeDataTypes;
-import com.pinguela.yourpc.model.constants.AttributeValueHandlingModes;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
@@ -22,13 +18,10 @@ import com.pinguela.yourpc.service.impl.ProductServiceImpl;
 import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
-import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.extensions.Extension;
-import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,21 +35,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.UriInfo;
 
 @Path("/product")
 public class ProductResource {
 
 	private static Logger logger = LogManager.getLogger(ProductResource.class);
-
-	private static final Pattern ATTRIBUTE_PARAMETER_REGEX = Pattern.compile("attr\\.[A-Z]{3}\\.[0-9]+");
-	private static final AttributeRangeValidator RANGE_VALIDATOR = AttributeRangeValidator.getInstance();
 
 	private ProductService productService;
 
@@ -145,68 +131,18 @@ public class ProductResource {
 			@QueryParam("attributes")
 			@ArraySchema(
 					schema = @Schema(
-							implementation = LightAttributeDTOMixin.class,
-							extensions = @Extension(
-									name = AttributeValueModelConverter.X_SCHEMA_REPRESENTATION,
-									properties = @ExtensionProperty(
-											name = AttributeValueModelConverter.REPRESENTATION_FORMAT,
-											value = AttributeValueModelConverter.COMPACT_FORMAT
-											)
-									)
+							implementation = LightAttributeDTOMixin.class
 							)
 					)
 			@Parameter(
 					description = "List of attribute criteria, represented by their ID and list of values to filter."
 					)
-			List<String> attributes,
-			@Context UriInfo uriInfo
+			List<AttributeDTO<?>> attributes
 			) {
 
-		MultivaluedMap<String, String> params = uriInfo.getQueryParameters();
 		ProductCriteria criteria = new ProductCriteria(name, launchDateMin, launchDateMax, 
-				stockMin, stockMax, priceMin, priceMax, categoryId, buildAttributeCriteria(params, categoryId));
+				stockMin, stockMax, priceMin, priceMax, categoryId, attributes);
 		return ResponseWrapper.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), pos, pageSize));
-	}
-
-	private static List<AttributeDTO<?>> buildAttributeCriteria(MultivaluedMap<String, String> parameterMap, Short categoryId) {
-
-		List<AttributeDTO<?>> list = new ArrayList<AttributeDTO<?>>();
-
-		Iterator<String> attributeKeyIterator = 
-				parameterMap.keySet().stream().filter(t -> ATTRIBUTE_PARAMETER_REGEX.matcher(t).matches()).iterator();
-
-		while (attributeKeyIterator.hasNext()) {
-			String key = attributeKeyIterator.next();
-			String[] keyComponents = key.split("\\.");
-			String dataTypeIdentifier = keyComponents[1];
-
-			if (!AttributeDataTypes.isValidType(dataTypeIdentifier)) {
-				throw new WebApplicationException(Status.BAD_REQUEST);
-			}
-
-			AttributeDTO<?> dto = AttributeDTO.getInstance(dataTypeIdentifier);
-			dto.setId(Integer.valueOf(keyComponents[2]));
-
-			List<String> parameters = parameterMap.get(key);
-			for (String parameter : parameters) {
-				try {
-					dto.addValue(null, parameter);
-				} catch (IllegalArgumentException e) {
-					throw new WebApplicationException(Status.BAD_REQUEST);
-				}
-			}
-
-			try {
-				if (AttributeValueHandlingModes.RANGE != dto.getValueHandlingMode()
-						|| RANGE_VALIDATOR.validate(dto, categoryId)) {
-					list.add(dto);
-				}
-			} catch (YPCException e) {
-				throw new WebApplicationException(Status.BAD_REQUEST);
-			}
-		}
-
-		return list;
 	}
 
 	private static class ProductResults extends Results<ProductDTOMixin> {}

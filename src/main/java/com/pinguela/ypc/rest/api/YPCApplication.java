@@ -4,6 +4,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.pinguela.ypc.rest.api.filter.CORSFilter;
 import com.pinguela.ypc.rest.api.json.ObjectMapperContextResolver;
+import com.pinguela.ypc.rest.api.json.param.AttributeParamConverterProvider;
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -18,7 +19,10 @@ import jakarta.ws.rs.ApplicationPath;
 				version = "0.0.1"
 				),
 		servers = {
-				@Server(url = "http://localhost:8080/ypc-rest-api/", description = "REST API Server for YPC")
+				@Server(
+						url = "http://localhost:8080/ypc-rest-api/", 
+						description = "REST API Server for YPC"
+						)
 		})
 @ApplicationPath("/api")
 public class YPCApplication extends ResourceConfig {
@@ -26,7 +30,7 @@ public class YPCApplication extends ResourceConfig {
 	public YPCApplication() {
 		// Resource package
 		packages(YPCApplication.class.getPackage().getName());
-		
+
 		// Filter package
 		packages(CORSFilter.class.getPackage().getName());
 
@@ -36,8 +40,9 @@ public class YPCApplication extends ResourceConfig {
 		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
 
-		// Jackson object mapper for serialization
+		// Jackson serialization-related classes
 		register(ObjectMapperContextResolver.class);
+		register(AttributeParamConverterProvider.class);
 	}
 
 }
