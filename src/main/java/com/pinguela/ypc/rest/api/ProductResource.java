@@ -22,10 +22,13 @@ import com.pinguela.yourpc.service.impl.ProductServiceImpl;
 import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
 import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
+import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -86,7 +89,7 @@ public class ProductResource {
 			@PathParam("id") @Min(1) Long id) {
 		return ResponseWrapper.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
 	}
-	
+
 	public Response create(@BeanParam ProductDTO dto) {
 
 		Long id = null;
@@ -141,12 +144,19 @@ public class ProductResource {
 			@QueryParam("pageSize") @NotNull Integer pageSize,
 			@QueryParam("attributes")
 			@ArraySchema(
-					schema = @Schema(implementation = LightAttributeDTOMixin.class)
+					schema = @Schema(
+							implementation = LightAttributeDTOMixin.class,
+							extensions = @Extension(
+									name = AttributeValueModelConverter.X_SCHEMA_REPRESENTATION,
+									properties = @ExtensionProperty(
+											name = AttributeValueModelConverter.REPRESENTATION_FORMAT,
+											value = AttributeValueModelConverter.COMPACT_FORMAT
+											)
+									)
+							)
 					)
 			@Parameter(
-					description = "List of attribute criteria, represented by an ID and list of values."
-							+ " Values should contain only their ID when searching within a set of values, or their value when searching within a range of values.",
-							example = "['id:2, values:[value:2600, value:5500]', 'id:45, values:[id:123, id:456]']"
+					description = "List of attribute criteria, represented by their ID and list of values to filter."
 					)
 			List<String> attributes,
 			@Context UriInfo uriInfo
