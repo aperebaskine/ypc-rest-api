@@ -33,5 +33,5 @@ public class LightAttributeDTOMixin {
 							)
 					)
 			)
-	private List<Object> values;
+	private List<AttributeValueDTO<?>> values;
 }
