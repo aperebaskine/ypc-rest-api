@@ -21,13 +21,17 @@ import io.swagger.v3.oas.models.media.Schema;
 @SuppressWarnings("rawtypes")
 public class AttributeValueModelConverter implements ModelConverter {
 
+	// Schema extension name for specifying compact
 	public static final String X_SCHEMA_REPRESENTATION = "x-schema-representation";
 
+	// Extension property name
 	public static final String REPRESENTATION_FORMAT = "format";
 
+	// Extension property values
 	public static final String COMPLETE_FORMAT = "complete";
 	public static final String COMPACT_FORMAT = "compact";
 
+	// Schema names
 	public static final String ATTRIBUTE_VALUE_NAME = "AttributeValue";
 	public static final String COMPACT_ATTRIBUTE_VALUE_NAME = "LightAttributeValue";
 
