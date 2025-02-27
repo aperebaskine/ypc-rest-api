@@ -35,8 +35,9 @@ public class AttributeParamConverter implements ParamConverter<AttributeDTO<?>> 
 
 	@Override
 	public AttributeDTO<?> fromString(String value) {
+		
 		try {
-			return mapper.reader().readValue(value);
+			return mapper.readerFor(AttributeDTO.class).readValue(value);
 		} catch (JsonProcessingException e) {
 			logger.error(e);
 			throw new WebApplicationException(e);

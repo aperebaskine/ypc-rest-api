@@ -19,6 +19,11 @@ public class CORSFilter implements ContainerResponseFilter {
 		
 		// TODO: Dynamically resolve allowed origins
 		headers.add("Access-Control-Allow-Origin", "http://localhost:4200");
+        headers.add("Access-Control-Allow-Headers",
+                "CSRF-Token, X-Requested-By, Authorization, Content-Type");
+        headers.add("Access-Control-Allow-Credentials", "true");
+        headers.add("Access-Control-Allow-Methods",
+                "GET, POST, PUT, DELETE, OPTIONS, HEAD");
 	}
 	
 }

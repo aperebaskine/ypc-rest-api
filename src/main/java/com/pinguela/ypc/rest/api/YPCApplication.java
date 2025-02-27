@@ -5,6 +5,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import com.pinguela.ypc.rest.api.filter.CORSFilter;
 import com.pinguela.ypc.rest.api.json.ObjectMapperContextResolver;
 import com.pinguela.ypc.rest.api.json.param.AttributeParamConverterProvider;
+import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -36,6 +37,7 @@ public class YPCApplication extends ResourceConfig {
 
 		// Swagger UI openapi.json resource
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
+		register(LightAttributeDTOMixin.class);
 
 		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());

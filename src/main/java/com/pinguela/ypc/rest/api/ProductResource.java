@@ -3,7 +3,6 @@ package com.pinguela.ypc.rest.api;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,21 +14,17 @@ import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
-import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
-import com.pinguela.ypc.rest.api.processing.AttributeRangeValidator;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -96,7 +91,6 @@ public class ProductResource {
 
 	@GET
 	@Path("/{locale}")
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -129,12 +123,12 @@ public class ProductResource {
 			@QueryParam("pos") @NotNull Integer pos,
 			@QueryParam("pageSize") @NotNull Integer pageSize,
 			@QueryParam("attributes")
-			@ArraySchema(
-					schema = @Schema(
-							implementation = LightAttributeDTOMixin.class
-							)
-					)
 			@Parameter(
+					schema = @Schema(
+							type = "string",
+							description = "Encoded JSO attribute for GET requests, represented by its ID and values.",
+							example = "[{ id: 2, values: [2500, 3500] }, { id: 25, values: [true] }]"
+							),
 					description = "List of attribute criteria, represented by their ID and list of values to filter."
 					)
 			List<AttributeDTO<?>> attributes
