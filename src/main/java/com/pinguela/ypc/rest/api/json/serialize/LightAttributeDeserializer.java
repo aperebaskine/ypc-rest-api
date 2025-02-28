@@ -59,7 +59,7 @@ public class LightAttributeDeserializer extends StdDeserializer<AttributeDTO<?>>
 			JsonNode value = values.next();
 			dto.addValue(
 					null,
-					value.get("value").traverse(p.getCodec())
+					value.traverse(p.getCodec())
 					.readValueAs(dto.getTypeParameterClass())
 					);
 		}
