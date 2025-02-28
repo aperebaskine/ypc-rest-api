@@ -8,7 +8,9 @@ import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
 import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
 
 import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
 
+@Provider
 public class ObjectMapperContextResolver 
 implements ContextResolver<ObjectMapper> {
 
