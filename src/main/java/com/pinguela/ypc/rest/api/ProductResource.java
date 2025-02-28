@@ -113,8 +113,22 @@ public class ProductResource {
 	public Response findBy(
 			@PathParam("locale") String locale, 
 			@QueryParam("name") String name, 
-			@QueryParam("launchDateFrom") Date launchDateMin,
-			@QueryParam("launchDateTo") Date launchDateMax,
+			@QueryParam("launchDateFrom") 
+			@Parameter(
+					schema = @Schema(
+							type = "string", 
+							format = "date"
+							)
+					)
+			Date launchDateMin,
+			@QueryParam("launchDateTo") 
+			@Parameter(
+					schema = @Schema(
+							type = "string", 
+							format = "date"
+							)
+					)
+			Date launchDateMax,
 			@QueryParam("stockMin") Integer stockMin,
 			@QueryParam("stockMax") Integer stockMax,
 			@QueryParam("priceMin") Double priceMin,
@@ -126,7 +140,9 @@ public class ProductResource {
 			@Parameter(
 					schema = @Schema(
 							type = "string",
-							description = "Encoded JSO attribute for GET requests, represented by its ID and values.",
+							format = "byte",
+							description = "Attribute list for GET requests in JSON format and Base64 encoded,"
+									+ " represented by its ID and values.",
 							example = "[{ id: 2, values: [2500, 3500] }, { id: 25, values: [true] }]"
 							),
 					description = "List of attribute criteria, represented by their ID and list of values to filter."
