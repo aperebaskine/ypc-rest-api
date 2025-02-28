@@ -2,8 +2,6 @@ package com.pinguela.ypc.rest.api;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-import com.pinguela.ypc.rest.api.filter.CORSFilter;
-import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -21,7 +19,7 @@ import jakarta.ws.rs.ApplicationPath;
 				@Server(
 						url = "http://localhost:8080/ypc-rest-api/", 
 						description = "REST API Server for YPC"
-						)
+					)
 		})
 @ApplicationPath("/api")
 public class YPCApplication extends ResourceConfig {
@@ -30,12 +28,8 @@ public class YPCApplication extends ResourceConfig {
 		// Resource package
 		packages(YPCApplication.class.getPackage().getName());
 
-		// Filter package
-		packages(CORSFilter.class.getPackage().getName());
-
 		// Swagger UI openapi.json resource
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
-		register(LightAttributeDTOMixin.class);
 
 		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
