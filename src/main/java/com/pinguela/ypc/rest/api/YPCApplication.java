@@ -3,8 +3,6 @@ package com.pinguela.ypc.rest.api;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.pinguela.ypc.rest.api.filter.CORSFilter;
-import com.pinguela.ypc.rest.api.json.ObjectMapperContextResolver;
-import com.pinguela.ypc.rest.api.json.param.AttributeParamConverterProvider;
 import com.pinguela.ypc.rest.api.mixin.LightAttributeDTOMixin;
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
@@ -41,10 +39,6 @@ public class YPCApplication extends ResourceConfig {
 
 		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
-
-		// Jackson serialization-related classes
-		register(ObjectMapperContextResolver.class);
-		register(AttributeParamConverterProvider.class);
 	}
 
 }
