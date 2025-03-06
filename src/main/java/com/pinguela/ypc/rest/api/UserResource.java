@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -35,7 +36,8 @@ public class UserResource {
 
 	@POST
 	@Path("/login")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.TEXT_PLAIN)
 	@Operation(
 			method = "POST",
 			operationId = "loginCustomer",
@@ -43,11 +45,7 @@ public class UserResource {
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully logged in",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = Customer.class)
-									)
+							description = "Successfully logged in, returning session token"
 							), 
 					@ApiResponse(
 							responseCode = "404",
@@ -63,10 +61,10 @@ public class UserResource {
 			@FormParam("password") @NotNull String password
 			) {
 
-		Customer c;
+		String sessionToken;
 
 		try {
-			c = customerService.login(email, password);
+			sessionToken = customerService.login(email, password);
 
 		} catch (InvalidLoginCredentialsException e) {
 			return Response.status(Status.NOT_FOUND).build();
@@ -74,7 +72,7 @@ public class UserResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		return ResponseWrapper.wrap(() -> c);
+		return ResponseWrapper.wrap(() -> sessionToken);
 	}
 
 	@POST
