@@ -1,8 +1,10 @@
 package com.pinguela.ypc.rest.api.json.param;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.validator.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +44,10 @@ public class AttributeListParamConverter implements ParamConverter<List<Attribut
 
 	@Override
 	public List<AttributeDTO<?>> fromString(String value) {
+		
+		if (GenericValidator.isBlankOrNull(value)) {
+			return Collections.emptyList();
+		}
 		
 		String decodedValue = new String(Base64.getDecoder().decode(value));
 		
