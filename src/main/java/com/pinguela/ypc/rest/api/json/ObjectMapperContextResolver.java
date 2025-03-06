@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
-import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
-import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
+import com.pinguela.ypc.rest.api.model.AttributeDTOMixin;
+import com.pinguela.ypc.rest.api.model.ProductDTOMixin;
 
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;

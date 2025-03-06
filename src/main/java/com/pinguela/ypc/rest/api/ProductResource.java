@@ -14,7 +14,7 @@ import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
-import com.pinguela.ypc.rest.api.mixin.ProductDTOMixin;
+import com.pinguela.ypc.rest.api.model.ProductDTOMixin;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;

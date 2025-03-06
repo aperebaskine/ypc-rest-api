@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import com.pinguela.yourpc.service.AttributeService;
 import com.pinguela.yourpc.service.impl.AttributeServiceImpl;
-import com.pinguela.ypc.rest.api.mixin.AttributeDTOMixin;
+import com.pinguela.ypc.rest.api.model.AttributeDTOMixin;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
