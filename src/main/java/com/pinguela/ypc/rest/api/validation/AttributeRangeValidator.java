@@ -1,4 +1,4 @@
-package com.pinguela.ypc.rest.api.processing;
+package com.pinguela.ypc.rest.api.validation;
 
 import java.util.Locale;
 

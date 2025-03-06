@@ -5,7 +5,10 @@ import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
+import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
+import com.pinguela.ypc.rest.api.model.ErrorLog;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
+import com.pinguela.ypc.rest.api.validation.Validators;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -92,11 +95,41 @@ public class UserResource {
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in request"
+							description = "Error in request",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = ErrorLog.class)
+									)
 							)
 			})
-	public Response register() {
-
+	public Response register(
+			@FormParam("firstName") @NotNull String firstName,
+			@FormParam("lastName1") @NotNull String lastName1,
+			@FormParam("lastName2") String lastName2,
+			@FormParam("documentTypeId") @NotNull String documentTypeId,
+			@FormParam("documentNumber") @NotNull String documentNumber,
+			@FormParam("phoneNumber") @NotNull String phoneNumber,
+			@FormParam("email") @NotNull String email,
+			@FormParam("password") @NotNull String password
+			) {
+		return new ParameterProcessor()
+				.validate("email", email, Validators.isUnusedEmail())
+				.buildResponse(() -> {
+					Customer c = new Customer();
+					c.setFirstName(firstName);
+					c.setLastName1(lastName1);
+					c.setLastName2(lastName2);
+					c.setDocumentTypeId(documentTypeId);
+					c.setDocumentNumber(documentNumber);
+					c.setPhoneNumber(phoneNumber);
+					c.setEmail(email);
+					c.setUnencryptedPassword(password);
+					
+					Integer id = customerService.register(c);
+					c.setId(id);
+					
+					return c;
+				});
 	}
 
 }
