@@ -45,7 +45,10 @@ public class UserResource {
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully logged in, returning session token"
+							description = "Successfully logged in, returning session token",
+							content = @Content(
+									mediaType = "text/plain"
+									)
 							), 
 					@ApiResponse(
 							responseCode = "404",
