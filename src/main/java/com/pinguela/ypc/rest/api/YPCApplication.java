@@ -6,7 +6,9 @@ import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import jakarta.ws.rs.ApplicationPath;
 
@@ -19,8 +21,13 @@ import jakarta.ws.rs.ApplicationPath;
 				@Server(
 						url = "http://localhost:8080/ypc-rest-api/", 
 						description = "REST API Server for YPC"
-					)
+						)
 		})
+@SecurityScheme(
+		name = "bearerAuth",
+		type = SecuritySchemeType.HTTP,
+		scheme = "bearer"
+		)
 @ApplicationPath("/api")
 public class YPCApplication extends ResourceConfig {
 

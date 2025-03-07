@@ -1,3 +1,4 @@
+
 package com.pinguela.ypc.rest.api;
 
 import com.pinguela.InvalidLoginCredentialsException;
@@ -14,13 +15,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -131,6 +136,42 @@ public class UserResource {
 					
 					return c;
 				});
+	}
+	
+	@GET
+	@Path("/")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(
+			method = "GET",
+			operationId = "findUserBySessionToken",
+			description = "Retrieve user data from session token", 
+			security = @SecurityRequirement(name = "bearerAuth"),
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully retrieved user data.",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = Customer.class)
+									)
+							),
+					@ApiResponse(
+							responseCode = "404",
+							description = "No user associated with session token"
+							)
+			})
+	public Response findBySessionToken(
+			@Context ContainerRequestContext requestContext
+			) {
+		
+		String auth = requestContext.getHeaderString("Authorization");
+		
+		if (auth == null || !auth.startsWith("Bearer ")) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		String sessionToken = auth.substring(7);
+		return ResponseWrapper.wrap(() -> customerService.findBySessionToken(sessionToken), Status.NOT_FOUND);
 	}
 
 }
