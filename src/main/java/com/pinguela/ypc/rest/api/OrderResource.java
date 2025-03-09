@@ -21,6 +21,12 @@ import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.Email;
 import jakarta.ws.rs.Consumes;
@@ -54,6 +60,24 @@ public class OrderResource {
 
 	@GET
 	@Path("/{locale}/{id}")
+	@Operation(
+			method = "GET",
+			operationId = "findOrderById",
+			description = "Retrieve an order by its ID.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully retrieved order",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = CustomerOrder.class)
+									)
+							),
+					@ApiResponse(
+							responseCode = "400",
+							description = "Error in parameter"
+							)
+			})
 	public Response findById(
 			@PathParam("locale") String locale,
 			@PathParam("id") Long id) {
@@ -62,6 +86,26 @@ public class OrderResource {
 
 	@GET
 	@Path("/{locale}")
+	@Operation(
+			method = "GET",
+			operationId = "findAllOrders",
+			description = "Retrieve all orders from the user.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully retrieved orders",
+							content = @Content(
+									mediaType = "application/json",
+									array = @ArraySchema(
+											schema = @Schema(implementation = Address.class)
+											)
+									)
+							),
+					@ApiResponse(
+							responseCode = "400",
+							description = "Error in parameter"
+							)
+			})
 	public Response findAll(
 			@PathParam("locale") String locale,
 			@Context ContainerRequestContext context
@@ -87,12 +131,43 @@ public class OrderResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(
+			method = "Post",
+			operationId = "createOrder",
+			description = "Place an order as the given user.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully placed order",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = CustomerOrder.class)
+									)
+							),
+					@ApiResponse(
+							responseCode = "400",
+							description = "Error in parameter"
+							)
+			})
 	public Response create(
 			@FormParam("billingAddressId") Integer billingAddressId,
 			@FormParam("shippingAddressId") Integer shippingAddressId,
-			@FormParam("orderLines") List<OrderLine> orderLines,
+			@FormParam("orderLines")
+			@Parameter(
+					array = @ArraySchema(
+							schema = @Schema(
+									type = "string"
+									)
+							)
+					)
+			List<OrderLine> orderLines,
 			@Context ContainerRequestContext context
 			) {
+		
+		// Don't look at this
+		for (OrderLine ol: orderLines) {
+			ol.setPurchasePrice(ol.getSalePrice()* 0.8);
+		}
 
 		String token = AuthUtils.getSessionToken(context);
 
@@ -112,6 +187,15 @@ public class OrderResource {
 			co.setBillingAddressId(billingAddressId);
 			co.setShippingAddressId(shippingAddressId);
 			co.setOrderLines(orderLines);
+			
+			co.setState("PND");
+			
+			Double total = co.getOrderLines().stream()
+					.map((orderLine) -> orderLine.getQuantity() * orderLine.getSalePrice())
+					.reduce((t, u) -> t + u)
+					.get();
+			
+			co.setTotalPrice(total);
 
 			Long id = this.orderService.create(co);
 
