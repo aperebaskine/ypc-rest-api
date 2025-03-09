@@ -8,6 +8,7 @@ import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
+import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.validation.Validators;
 
@@ -24,6 +25,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -85,6 +87,7 @@ public class UserResource {
 
 	@POST
 	@Path("/register")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "POST",
@@ -112,8 +115,8 @@ public class UserResource {
 			@FormParam("firstName") @NotNull String firstName,
 			@FormParam("lastName1") @NotNull String lastName1,
 			@FormParam("lastName2") String lastName2,
-			@FormParam("documentTypeId") @NotNull String documentTypeId,
-			@FormParam("documentNumber") @NotNull String documentNumber,
+			@FormParam("docType") @NotNull String documentTypeId,
+			@FormParam("docNumber") @NotNull String documentNumber,
 			@FormParam("phoneNumber") @NotNull String phoneNumber,
 			@FormParam("email") @NotNull String email,
 			@FormParam("password") @NotNull String password
@@ -143,7 +146,7 @@ public class UserResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
-			operationId = "findUserBySessionToken",
+			operationId = "getAuthenticatedUser",
 			description = "Retrieve user data from session token", 
 			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
@@ -160,18 +163,38 @@ public class UserResource {
 							description = "No user associated with session token"
 							)
 			})
-	public Response findBySessionToken(
+	public Response getAuthenticatedUser(
 			@Context ContainerRequestContext requestContext
 			) {
 		
-		String auth = requestContext.getHeaderString("Authorization");
-		
-		if (auth == null || !auth.startsWith("Bearer ")) {
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-		
-		String sessionToken = auth.substring(7);
-		return ResponseWrapper.wrap(() -> customerService.findBySessionToken(sessionToken), Status.NOT_FOUND);
+		String token = AuthUtils.getSessionToken(requestContext);
+		return ResponseWrapper.wrap(() -> customerService.findBySessionToken(token), Status.NOT_FOUND);
+	}
+	
+	@GET
+	@Path("/exists")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(
+			method = "GET",
+			operationId = "emailExists",
+			description = "Check whether an email is already in use", 
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully checked for emasil",
+							content = @Content(
+									mediaType = "text/plain"
+									)
+							),
+					@ApiResponse(
+							responseCode = "500",
+							description = "Unknown error occured"
+							)
+			})
+	public Response emailExists(
+			@QueryParam("email") @NotNull @Email String email
+			) {
+		return ResponseWrapper.wrap(() -> customerService.exists(email), Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR);
 	}
 
 }

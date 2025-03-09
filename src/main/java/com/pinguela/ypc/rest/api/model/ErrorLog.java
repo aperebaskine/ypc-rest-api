@@ -3,8 +3,11 @@ package com.pinguela.ypc.rest.api.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ErrorLog {
 	
+	@JsonProperty
 	private Map<String, String> errors;
 	
 	public ErrorLog() {
