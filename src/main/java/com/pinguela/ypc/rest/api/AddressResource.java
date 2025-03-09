@@ -5,6 +5,7 @@ import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.AddressServiceImpl;
+import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -39,6 +40,7 @@ public class AddressResource {
 	private AddressService addressService;
 
 	public AddressResource() {
+		this.customerService = new CustomerServiceImpl();
 		this.addressService = new AddressServiceImpl();
 	}
 

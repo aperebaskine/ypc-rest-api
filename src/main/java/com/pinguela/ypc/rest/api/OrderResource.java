@@ -14,7 +14,9 @@ import com.pinguela.yourpc.model.OrderLine;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.CustomerOrderService;
 import com.pinguela.yourpc.service.CustomerService;
+import com.pinguela.yourpc.service.impl.AddressServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
+import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
@@ -45,6 +47,8 @@ public class OrderResource {
 	private CustomerOrderService orderService;
 
 	public OrderResource() {
+		this.customerService = new CustomerServiceImpl();
+		this.addressService = new AddressServiceImpl();
 		this.orderService = new CustomerOrderServiceImpl();
 	}
 
