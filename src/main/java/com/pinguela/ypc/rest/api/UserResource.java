@@ -204,7 +204,7 @@ public class UserResource {
 		return ResponseWrapper.wrap(() -> {
 			return new Exists(
 					GenericValidator.isBlankOrNull(email) ? null : this.customerService.emailExists(email),
-					GenericValidator.isBlankOrNull(phoneNumber) ? null : this.customerService.emailExists(phoneNumber)
+					GenericValidator.isBlankOrNull(phoneNumber) ? null : this.customerService.phoneNumberExists(phoneNumber)
 					);
 		});
 	}
