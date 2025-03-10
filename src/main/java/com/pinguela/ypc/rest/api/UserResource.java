@@ -1,6 +1,8 @@
 
 package com.pinguela.ypc.rest.api;
 
+import org.apache.commons.validator.GenericValidator;
+
 import com.pinguela.InvalidLoginCredentialsException;
 import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.Customer;
@@ -8,6 +10,7 @@ import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
+import com.pinguela.ypc.rest.api.model.Exists;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.validation.Validators;
@@ -173,17 +176,20 @@ public class UserResource {
 	
 	@GET
 	@Path("/exists")
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
-			operationId = "emailExists",
-			description = "Check whether an email is already in use", 
+			operationId = "exists",
+			description = "Check whether an email and/or phone number is already in use", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully checked for emasil",
+							description = "Successfully retrieved whether email or phone number exists",
 							content = @Content(
-									mediaType = "text/plain"
+									schema = @Schema(
+											implementation = Exists.class
+											),
+									mediaType = MediaType.APPLICATION_JSON
 									)
 							),
 					@ApiResponse(
@@ -191,10 +197,16 @@ public class UserResource {
 							description = "Unknown error occured"
 							)
 			})
-	public Response emailExists(
-			@QueryParam("email") @NotNull @Email String email
+	public Response exists(
+			@QueryParam("email") @Email String email,
+			@QueryParam("phoneNumber") String phoneNumber
 			) {
-		return ResponseWrapper.wrap(() -> customerService.exists(email), Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR);
+		return ResponseWrapper.wrap(() -> {
+			return new Exists(
+					GenericValidator.isBlankOrNull(email) ? null : this.customerService.emailExists(email),
+					GenericValidator.isBlankOrNull(phoneNumber) ? null : this.customerService.emailExists(phoneNumber)
+					);
+		});
 	}
 
 }
