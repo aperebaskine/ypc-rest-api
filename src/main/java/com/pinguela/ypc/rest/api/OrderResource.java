@@ -11,12 +11,15 @@ import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.model.CustomerOrder;
 import com.pinguela.yourpc.model.CustomerOrderCriteria;
 import com.pinguela.yourpc.model.OrderLine;
+import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.CustomerOrderService;
 import com.pinguela.yourpc.service.CustomerService;
+import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.AddressServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
+import com.pinguela.yourpc.service.impl.ProductServiceImpl;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
@@ -48,11 +51,13 @@ import jakarta.ws.rs.core.Response.Status;
 @SecurityRequirement(name = "bearerAuth")
 public class OrderResource {
 
+	private ProductService productService;
 	private CustomerService customerService;
 	private AddressService addressService;
 	private CustomerOrderService orderService;
 
 	public OrderResource() {
+		this.productService = new ProductServiceImpl();
 		this.customerService = new CustomerServiceImpl();
 		this.addressService = new AddressServiceImpl();
 		this.orderService = new CustomerOrderServiceImpl();
@@ -164,9 +169,15 @@ public class OrderResource {
 			@Context ContainerRequestContext context
 			) {
 		
-		// Don't look at this
 		for (OrderLine ol: orderLines) {
-			ol.setPurchasePrice(ol.getSalePrice()* 0.8);
+			try {
+				ProductDTO p = this.productService.findById(ol.getProductId().longValue(),
+						LocaleUtils.getDefault());
+				ol.setPurchasePrice(p.getPurchasePrice());
+			} catch (Exception e) {
+				throw new WebApplicationException(Status.BAD_REQUEST);
+
+			}
 		}
 
 		String token = AuthUtils.getSessionToken(context);
