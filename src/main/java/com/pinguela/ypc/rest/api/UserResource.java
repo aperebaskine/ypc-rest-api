@@ -11,6 +11,7 @@ import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
 import com.pinguela.ypc.rest.api.model.Exists;
+import com.pinguela.ypc.rest.api.model.SessionToken;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.validation.Validators;
@@ -29,6 +30,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -102,7 +104,7 @@ public class UserResource {
 							description = "Successfully registered.",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = Customer.class)
+									schema = @Schema(implementation = SessionToken.class)
 									)
 							),
 					@ApiResponse(
@@ -138,9 +140,12 @@ public class UserResource {
 					c.setUnencryptedPassword(password);
 					
 					Integer id = customerService.register(c);
-					c.setId(id);
 					
-					return c;
+					if (id == null) {
+						throw new WebApplicationException(Status.BAD_REQUEST);
+					}
+					
+					return new SessionToken(customerService.login(email, password));
 				});
 	}
 	
