@@ -168,7 +168,7 @@ public class AddressResource {
 							)
 			})
 	public Response update(
-			@FormParam("id") Integer id,
+			@FormParam("id") @NotNull Integer id,
 			@FormParam("streetName") @NotNull String streetName,
 			@FormParam("streetNumber") Short streetNumber,
 			@FormParam("floor") Short floor,
