@@ -1,5 +1,7 @@
 package com.pinguela.ypc.rest.api.json.param;
 
+import java.util.List;
+
 import org.apache.commons.validator.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,20 +15,20 @@ import com.pinguela.yourpc.model.OrderLine;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.ext.ParamConverter;
 
-public class OrderLineParamConverter implements ParamConverter<OrderLine> {
+public class OrderLineListParamConverter implements ParamConverter<List<OrderLine>> {
 	
-	private static Logger logger = LogManager.getLogger(OrderLineParamConverter.class);
+	private static Logger logger = LogManager.getLogger(OrderLineListParamConverter.class);
 	
 	private ObjectMapper mapper;
 	private JavaType type;
 	
-	public OrderLineParamConverter() {
+	public OrderLineListParamConverter() {
 		mapper = new ObjectMapper();
-		type = mapper.constructType(new TypeReference<OrderLine>() {});
+		type = mapper.constructType(new TypeReference<List<OrderLine>>() {});
 	}
 
 	@Override
-	public OrderLine fromString(String value) {
+	public List<OrderLine> fromString(String value) {
 		
 		if (GenericValidator.isBlankOrNull(value)) {
 			return null;
@@ -41,7 +43,7 @@ public class OrderLineParamConverter implements ParamConverter<OrderLine> {
 	}
 
 	@Override
-	public String toString(OrderLine value) {
+	public String toString(List<OrderLine> value) {
 		try {
 			return mapper.writerFor(type).writeValueAsString(value);
 		} catch (JsonProcessingException e) {

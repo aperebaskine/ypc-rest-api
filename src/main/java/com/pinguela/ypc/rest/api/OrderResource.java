@@ -134,7 +134,7 @@ public class OrderResource {
 
 	@POST
 	@Path("/")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON})
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "Post",
@@ -159,16 +159,14 @@ public class OrderResource {
 			@FormParam("shippingAddressId") Integer shippingAddressId,
 			@FormParam("orderLines")
 			@Parameter(
-					array = @ArraySchema(
-							schema = @Schema(
-									type = "string"
-									)
+					schema = @Schema(
+							type = "string"
 							)
 					)
 			List<OrderLine> orderLines,
 			@Context ContainerRequestContext context
 			) {
-		
+
 		for (OrderLine ol: orderLines) {
 			try {
 				ProductDTO p = this.productService.findById(ol.getProductId().longValue(),
@@ -198,14 +196,14 @@ public class OrderResource {
 			co.setBillingAddressId(billingAddressId);
 			co.setShippingAddressId(shippingAddressId);
 			co.setOrderLines(orderLines);
-			
+
 			co.setState("PND");
-			
+
 			Double total = co.getOrderLines().stream()
 					.map((orderLine) -> orderLine.getQuantity() * orderLine.getSalePrice())
 					.reduce((t, u) -> t + u)
 					.get();
-			
+
 			co.setTotalPrice(total);
 
 			Long id = this.orderService.create(co);
