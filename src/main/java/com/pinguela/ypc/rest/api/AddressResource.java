@@ -284,7 +284,7 @@ public class AddressResource {
 					Customer c = customerService.findBySessionToken(token);
 					return this.addressService.findByCustomer(c.getId());
 				},
-				Status.INTERNAL_SERVER_ERROR, 
+				Status.OK, 
 				Status.INTERNAL_SERVER_ERROR
 				);
 	}
