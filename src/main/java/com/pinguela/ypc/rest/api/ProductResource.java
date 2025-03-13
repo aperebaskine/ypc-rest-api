@@ -3,6 +3,7 @@ package com.pinguela.ypc.rest.api;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -147,11 +149,17 @@ public class ProductResource {
 							),
 					description = "List of attribute criteria, represented by their ID and list of values to filter."
 					)
-			List<AttributeDTO<?>> attributes
+			List<AttributeDTO<?>> attributes,
+			@QueryParam("orderBy") @DefaultValue(" pl.NAME") String orderBy,
+			@QueryParam("ascDesc") @DefaultValue("asc") String ascDesc
 			) {
 
 		ProductCriteria criteria = new ProductCriteria(name, launchDateMin, launchDateMax, 
 				stockMin, stockMax, priceMin, priceMax, categoryId, attributes);
+		
+		criteria.setOrderBy(orderBy);
+		criteria.setAscDesc("asc".equals(ascDesc));
+		
 		return ResponseWrapper.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), pos, pageSize));
 	}
 
