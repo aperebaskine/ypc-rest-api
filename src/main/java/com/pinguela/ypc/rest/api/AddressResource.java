@@ -192,6 +192,7 @@ public class AddressResource {
 					
 					Address a = new Address();
 					a.setId(id);
+					a.setCreationDate(current.getCreationDate());
 					a.setCustomerId(c.getId());
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
