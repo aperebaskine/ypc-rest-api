@@ -7,7 +7,6 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class AuthUtils {
 	
-	@SuppressWarnings("resource")
 	public static String getSessionToken(ContainerRequestContext requestContext) {
 		
 		String auth = requestContext.getHeaderString("Authorization");
