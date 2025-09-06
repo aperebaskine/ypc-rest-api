@@ -11,13 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import com.pinguela.DataException;
 import com.pinguela.ServiceException;
-import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.model.ImageEntry;
-import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.ImageFileService;
-import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.yourpc.service.impl.ImageFileServiceImpl;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 
@@ -47,11 +43,9 @@ public class ImageResource {
 
 	private static Logger logger = LogManager.getLogger(ImageResource.class);
 
-	private CustomerService customerService;
 	private ImageFileService imageFileService;
 
 	public ImageResource() {
-		this.customerService = new CustomerServiceImpl();
 		this.imageFileService = new ImageFileServiceImpl();
 	}
 
@@ -130,10 +124,8 @@ public class ImageResource {
 			) {
 
 		try {
-			String sessionToken = AuthUtils.getSessionToken(context);
-			Customer c = this.customerService.findBySessionToken(sessionToken);
-
-			List<InputStream> isList = imageFileService.getInputStreams("avatar", c.getId());
+			Integer userId = AuthUtils.getUserId(context);
+			List<InputStream> isList = imageFileService.getInputStreams("avatar", userId);
 
 			if (isList.size() < 1) {
 				return Response.status(Status.NOT_FOUND).build();
@@ -144,7 +136,7 @@ public class ImageResource {
 			}
 
 			return Response.ok(isList.get(0)).build();
-		} catch (ServiceException | DataException | IOException e) {
+		} catch (ServiceException | IOException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.BAD_REQUEST);
 		}
@@ -187,23 +179,22 @@ public class ImageResource {
 			) {
 
 		try {
-			String sessionToken = AuthUtils.getSessionToken(context);
-			Customer c = this.customerService.findBySessionToken(sessionToken);
+			Integer userId = AuthUtils.getUserId(context);
 
 			BufferedImage img = ImageIO.read(is);
 			ImageEntry entry = new ImageEntry(img, null);
 
-			List<String> paths = imageFileService.getFilePaths("avatar", c.getId());
+			List<String> paths = imageFileService.getFilePaths("avatar", userId);
 			if (!paths.isEmpty()) {
 				entry.setPath(paths.get(0));
 			}
 
-			if (this.imageFileService.update("avatar", c.getId(), entry)) {
+			if (this.imageFileService.update("avatar", userId, entry)) {
 				return Response.ok().build();
 			} else {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
-		} catch (ServiceException | DataException | IOException e) {
+		} catch (ServiceException | IOException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.BAD_REQUEST);
 		}

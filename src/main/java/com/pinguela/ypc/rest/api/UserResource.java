@@ -14,6 +14,7 @@ import com.pinguela.ypc.rest.api.model.Exists;
 import com.pinguela.ypc.rest.api.model.SessionToken;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
+import com.pinguela.ypc.rest.api.util.TokenManager;
 import com.pinguela.ypc.rest.api.validation.Validators;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,15 +32,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 @Path("/user")
 public class UserResource {
 
+	private TokenManager tokenManager = TokenManager.getInstance();
 	private CustomerService customerService;
 
 	public UserResource() {
@@ -76,10 +78,10 @@ public class UserResource {
 			@FormParam("password") @NotNull String password
 			) {
 
-		String sessionToken;
+		Customer c;
 
 		try {
-			sessionToken = customerService.login(email, password);
+			c = customerService.login(email, password);
 
 		} catch (InvalidLoginCredentialsException e) {
 			return Response.status(Status.NOT_FOUND).build();
@@ -87,7 +89,7 @@ public class UserResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		return ResponseWrapper.wrap(() -> sessionToken);
+		return ResponseWrapper.wrap(() -> tokenManager.encodeToken(c));
 	}
 
 	@POST
@@ -129,26 +131,27 @@ public class UserResource {
 		return new ParameterProcessor()
 				.validate("email", email, Validators.isUnusedEmail())
 				.buildResponse(() -> {
-					Customer c = new Customer();
-					c.setFirstName(firstName);
-					c.setLastName1(lastName1);
-					c.setLastName2(lastName2);
-					c.setDocumentTypeId(documentTypeId);
-					c.setDocumentNumber(documentNumber);
-					c.setPhoneNumber(phoneNumber);
-					c.setEmail(email);
-					c.setUnencryptedPassword(password);
-					
-					Integer id = customerService.register(c);
-					
-					if (id == null) {
+					Customer customer = new Customer();
+					customer.setFirstName(firstName);
+					customer.setLastName1(lastName1);
+					customer.setLastName2(lastName2);
+					customer.setDocumentTypeId(documentTypeId);
+					customer.setDocumentNumber(documentNumber);
+					customer.setPhoneNumber(phoneNumber);
+					customer.setEmail(email);
+					customer.setUnencryptedPassword(password);
+
+					Integer id = customerService.register(customer);
+					Customer createdCustomer = customerService.findById(id);
+
+					if (createdCustomer == null) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
-					
-					return new SessionToken(customerService.login(email, password));
+
+					return tokenManager.encodeToken(createdCustomer);
 				});
 	}
-	
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -172,13 +175,12 @@ public class UserResource {
 							)
 			})
 	public Response getAuthenticatedUser(
-			@Context ContainerRequestContext requestContext
+			@Context SecurityContext securityContext
 			) {
-		
-		String token = AuthUtils.getSessionToken(requestContext);
-		return ResponseWrapper.wrap(() -> customerService.findBySessionToken(token), Status.NOT_FOUND);
+		Integer id = AuthUtils.getUserId(securityContext);
+		return ResponseWrapper.wrap(() -> customerService.findById(id), Status.NOT_FOUND);
 	}
-	
+
 	@GET
 	@Path("/exists")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -209,7 +211,7 @@ public class UserResource {
 		return ResponseWrapper.wrap(() -> {
 			return new Exists(
 					GenericValidator.isBlankOrNull(email) ? null : this.customerService.emailExists(email),
-					GenericValidator.isBlankOrNull(phoneNumber) ? null : this.customerService.phoneNumberExists(phoneNumber)
+							GenericValidator.isBlankOrNull(phoneNumber) ? null : this.customerService.phoneNumberExists(phoneNumber)
 					);
 		});
 	}

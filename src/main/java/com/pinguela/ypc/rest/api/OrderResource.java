@@ -116,19 +116,8 @@ public class OrderResource {
 			@Context ContainerRequestContext context
 			) {
 
+		Integer customerId = AuthUtils.getUserId(context);
 		Locale l = LocaleUtils.getLocale(locale);
-
-		String token = AuthUtils.getSessionToken(context);
-		Customer c;
-
-		try {
-			c = this.customerService.findBySessionToken(token);
-		} catch (ServiceException | DataException e) {
-			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-		}
-
-		Integer customerId = c.getId();
-
 		return ResponseWrapper.wrap(() -> orderService.findByCustomer(customerId, l));
 	}
 
@@ -178,10 +167,9 @@ public class OrderResource {
 			}
 		}
 
-		String token = AuthUtils.getSessionToken(context);
-
 		try {
-			Customer c = this.customerService.findBySessionToken(token);
+			Integer customerId = AuthUtils.getUserId(context);
+			Customer c = this.customerService.findById(customerId);
 
 			Address billing = this.addressService.findById(billingAddressId);
 			Address shipping = this.addressService.findById(shippingAddressId);

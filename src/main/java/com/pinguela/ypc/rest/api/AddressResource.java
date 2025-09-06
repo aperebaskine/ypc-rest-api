@@ -1,11 +1,8 @@
 package com.pinguela.ypc.rest.api;
 
 import com.pinguela.yourpc.model.Address;
-import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.AddressService;
-import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.AddressServiceImpl;
-import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -36,11 +33,9 @@ import jakarta.ws.rs.core.Response.Status;
 @SecurityRequirement(name = "bearerAuth")
 public class AddressResource {
 
-	private CustomerService customerService;
 	private AddressService addressService;
 
 	public AddressResource() {
-		this.customerService = new CustomerServiceImpl();
 		this.addressService = new AddressServiceImpl();
 	}
 
@@ -71,19 +66,18 @@ public class AddressResource {
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					String token = AuthUtils.getSessionToken(context);
-					Customer c = customerService.findBySessionToken(token);
+					Integer customerId = AuthUtils.getUserId(context);
 					Address a = this.addressService.findById(id);
-					
-					if (!a.getCustomerId().equals(c.getId())) {
+
+					if (!a.getCustomerId().equals(customerId)) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
-					
+
 					return a;
 				}
 				);
 	}
-	
+
 	@POST
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -119,11 +113,10 @@ public class AddressResource {
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					String token = AuthUtils.getSessionToken(context);
-					Customer c = customerService.findBySessionToken(token);
-					
+					Integer customerId = AuthUtils.getUserId(context);
+
 					Address a = new Address();
-					a.setCustomerId(c.getId());
+					a.setCustomerId(customerId);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
 					a.setFloor(floor);
@@ -132,9 +125,9 @@ public class AddressResource {
 					a.setCityId(cityId);
 					a.setIsDefault(isDefault);
 					a.setIsBilling(isBilling);
-					
+
 					Integer id = this.addressService.create(a);
-					
+
 					if (id == null) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
@@ -144,7 +137,7 @@ public class AddressResource {
 				}
 				);
 	}
-	
+
 	@PUT
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -181,19 +174,18 @@ public class AddressResource {
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					String token = AuthUtils.getSessionToken(context);
-					Customer c = customerService.findBySessionToken(token);
-					
+					Integer customerId = AuthUtils.getUserId(context);
+
 					Address current = this.addressService.findById(id);
-					
-					if (!current.getCustomerId().equals(c.getId())) {
+
+					if (!current.getCustomerId().equals(customerId)) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
-					
+
 					Address a = new Address();
 					a.setId(id);
 					a.setCreationDate(current.getCreationDate());
-					a.setCustomerId(c.getId());
+					a.setCustomerId(customerId);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
 					a.setFloor(floor);
@@ -202,9 +194,9 @@ public class AddressResource {
 					a.setCityId(cityId);
 					a.setIsDefault(isDefault);
 					a.setIsBilling(isBilling);
-					
+
 					Integer newId = this.addressService.update(a);
-					
+
 					if (id == null) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
@@ -215,7 +207,7 @@ public class AddressResource {
 				);
 	}
 
-	
+
 	@DELETE
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -239,14 +231,13 @@ public class AddressResource {
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					String token = AuthUtils.getSessionToken(context);
-					Customer c = customerService.findBySessionToken(token);
+					Integer customerId = AuthUtils.getUserId(context);
 					Address a = this.addressService.findById(id);
-					
-					if (!a.getCustomerId().equals(c.getId())) {
+
+					if (!a.getCustomerId().equals(customerId)) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
-					
+
 					return this.addressService.delete(id);
 				}
 				);
@@ -278,12 +269,10 @@ public class AddressResource {
 	public Response findAll(
 			@Context ContainerRequestContext context
 			) {
-		String token = AuthUtils.getSessionToken(context);
-
 		return ResponseWrapper.wrap(
 				() -> {
-					Customer c = customerService.findBySessionToken(token);
-					return this.addressService.findByCustomer(c.getId());
+					Integer customerId = AuthUtils.getUserId(context);
+					return this.addressService.findByCustomer(customerId);
 				},
 				Status.OK, 
 				Status.INTERNAL_SERVER_ERROR
@@ -309,13 +298,10 @@ public class AddressResource {
 	public Response deleteAll(
 			@Context ContainerRequestContext context
 			) {
-
-		String token = AuthUtils.getSessionToken(context);
-
 		return ResponseWrapper.wrap(
 				() -> {
-					Customer c = customerService.findBySessionToken(token);
-					return this.addressService.deleteByCustomer(c.getId());
+					Integer customerId = AuthUtils.getUserId(context);
+					return this.addressService.deleteByCustomer(customerId);
 				});
 	}
 
