@@ -20,7 +20,11 @@ import jakarta.ws.rs.ApplicationPath;
 		servers = {
 				@Server(
 						url = "https://informaticapinguela.es/ypc-rest-api/", 
-						description = "REST API Server for YPC"
+						description = "Production server for YPC REST API"
+						),
+				@Server(
+						url = "http://localhost:8080/ypc-rest-api/", 
+						description = "Local testing server"
 						)
 		})
 @SecurityScheme(
