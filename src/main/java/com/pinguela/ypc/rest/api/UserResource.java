@@ -11,7 +11,6 @@ import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
 import com.pinguela.ypc.rest.api.model.Exists;
-import com.pinguela.ypc.rest.api.model.SessionToken;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.util.TokenManager;
@@ -105,8 +104,7 @@ public class UserResource {
 							responseCode = "200", 
 							description = "Successfully registered.",
 							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = SessionToken.class)
+									mediaType = "text/plain"
 									)
 							),
 					@ApiResponse(
