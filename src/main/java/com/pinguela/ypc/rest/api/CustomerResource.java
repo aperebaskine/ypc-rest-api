@@ -37,13 +37,13 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
-@Path("/user")
-public class UserResource {
+@Path("/customer")
+public class CustomerResource {
 
 	private TokenManager tokenManager = TokenManager.getInstance();
 	private CustomerService customerService;
 
-	public UserResource() {
+	public CustomerResource() {
 		this.customerService = new CustomerServiceImpl();
 	}
 
