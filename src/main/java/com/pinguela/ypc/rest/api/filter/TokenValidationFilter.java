@@ -25,9 +25,9 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 @PreMatching
 @Priority(Priorities.AUTHENTICATION)
-public class AuthenticationFilter implements ContainerRequestFilter {
+public class TokenValidationFilter implements ContainerRequestFilter {
 	
-	private static Logger logger = LogManager.getLogger(AuthenticationFilter.class);
+	private static Logger logger = LogManager.getLogger(TokenValidationFilter.class);
 	private TokenManager tokenManager = TokenManager.getInstance();
 
 	@Override
