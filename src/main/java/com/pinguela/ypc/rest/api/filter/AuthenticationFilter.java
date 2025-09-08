@@ -37,7 +37,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 		
-		if (!isAuthGated(requestContext)) {
+		if (isPublicEndpoint(requestContext)) {
 			return;
 		}
 		
@@ -47,7 +47,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		}
 	}
 	
-	private boolean isAuthGated(ContainerRequestContext requestContext) {
+	private boolean isPublicEndpoint(ContainerRequestContext requestContext) {
 		Class<?> clazz = resourceInfo.getResourceClass();
 		Method method = resourceInfo.getResourceMethod();
 		
