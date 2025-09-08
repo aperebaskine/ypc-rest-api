@@ -1,6 +1,7 @@
 package com.pinguela.ypc.rest.api;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
@@ -30,7 +31,8 @@ import jakarta.ws.rs.ApplicationPath;
 @SecurityScheme(
 		name = "bearerAuth",
 		type = SecuritySchemeType.HTTP,
-		scheme = "bearer"
+		scheme = "bearer",
+		bearerFormat = "JWT"
 		)
 @ApplicationPath("/api")
 public class YPCApplication extends ResourceConfig {
@@ -41,6 +43,9 @@ public class YPCApplication extends ResourceConfig {
 
 		// Swagger UI openapi.json resource
 		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
+		
+		// RBAC enforcer
+		register(RolesAllowedDynamicFeature.class);
 
 		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
