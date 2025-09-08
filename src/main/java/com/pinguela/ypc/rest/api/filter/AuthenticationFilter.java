@@ -1,10 +1,13 @@
 package com.pinguela.ypc.rest.api.filter;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.pinguela.yourpc.service.cache.Cache;
+import com.pinguela.yourpc.service.cache.CacheManager;
 import com.pinguela.ypc.rest.api.annotations.Public;
 
 import jakarta.annotation.Priority;
@@ -24,24 +27,31 @@ import jakarta.ws.rs.ext.Provider;
 public class AuthenticationFilter implements ContainerRequestFilter {
 	
 	private static Logger logger = LogManager.getLogger(AuthenticationFilter.class);
+	private static final Cache<Method, Boolean> CACHE = CacheManager.getInstance().getCache("authMethod", Method.class, Boolean.class);
 	
 	@Context
 	private ResourceInfo resourceInfo;
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-		
-		if (resourceInfo.getResourceClass().isAnnotationPresent(Public.class)
-				|| resourceInfo.getResourceMethod().isAnnotationPresent(Public.class)) {
-			return;
-		}
 
 		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+		
+		if (!isAuthGated(requestContext)) {
+			return;
+		}
 		
 		if (auth == null) {
 			logger.warn("An unauthenticated user attempted to call an auth-gated endpoint. Public endpoints must declare the @Public annotation.");
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		}
+	}
+	
+	private boolean isAuthGated(ContainerRequestContext requestContext) {
+		Class<?> clazz = resourceInfo.getResourceClass();
+		Method method = resourceInfo.getResourceMethod();
+		
+		return CACHE.computeIfAbsent(method, (m) -> clazz.isAnnotationPresent(Public.class) || method.isAnnotationPresent(Public.class));
 	}
 
 }
