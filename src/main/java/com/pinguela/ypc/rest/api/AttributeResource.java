@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import com.pinguela.yourpc.service.AttributeService;
 import com.pinguela.yourpc.service.impl.AttributeServiceImpl;
+import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.model.AttributeDTOMixin;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
@@ -24,6 +25,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+@Public
 @Path("/attribute")
 public class AttributeResource {
 

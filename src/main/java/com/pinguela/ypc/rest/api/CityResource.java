@@ -3,6 +3,7 @@ package com.pinguela.ypc.rest.api;
 import com.pinguela.yourpc.model.City;
 import com.pinguela.yourpc.service.CityService;
 import com.pinguela.yourpc.service.impl.CityServiceImpl;
+import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+@Public
 @Path("/cities")
 public class CityResource {
 	

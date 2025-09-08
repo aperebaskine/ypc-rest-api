@@ -42,7 +42,7 @@ public class YPCApplication extends ResourceConfig {
 		packages(YPCApplication.class.getPackage().getName());
 
 		// Swagger UI openapi.json resource
-		register(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
+		register(OpenApiResource.class);
 		
 		// RBAC enforcer
 		register(RolesAllowedDynamicFeature.class);

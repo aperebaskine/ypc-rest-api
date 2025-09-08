@@ -15,6 +15,7 @@ import com.pinguela.ServiceException;
 import com.pinguela.yourpc.model.ImageEntry;
 import com.pinguela.yourpc.service.ImageFileService;
 import com.pinguela.yourpc.service.impl.ImageFileServiceImpl;
+import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +51,7 @@ public class ImageResource {
 	}
 
 	@GET
+	@Public
 	@Path("/product/{id}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(

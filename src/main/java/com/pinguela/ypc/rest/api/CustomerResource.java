@@ -8,6 +8,7 @@ import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
+import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
 import com.pinguela.ypc.rest.api.model.Exists;
@@ -48,6 +49,7 @@ public class CustomerResource {
 	}
 
 	@POST
+	@Public
 	@Path("/login")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -92,6 +94,7 @@ public class CustomerResource {
 	}
 
 	@POST
+	@Public
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -180,6 +183,7 @@ public class CustomerResource {
 	}
 
 	@GET
+	@Public
 	@Path("/exists")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(

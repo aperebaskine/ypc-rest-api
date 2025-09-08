@@ -3,6 +3,7 @@ package com.pinguela.ypc.rest.api;
 import com.pinguela.yourpc.model.dto.CategoryDTO;
 import com.pinguela.yourpc.service.CategoryService;
 import com.pinguela.yourpc.service.impl.CategoryServiceImpl;
+import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -19,6 +20,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+@Public
 @Path("/categories")
 public class CategoryResource {
 

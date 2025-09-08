@@ -14,6 +14,7 @@ import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
+import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.model.ProductDTOMixin;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -47,6 +48,7 @@ public class ProductResource {
 	}
 
 	@GET
+	@Public
 	@Path("/{locale}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
@@ -91,6 +93,7 @@ public class ProductResource {
 	}
 
 	@GET
+	@Public
 	@Path("/{locale}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
