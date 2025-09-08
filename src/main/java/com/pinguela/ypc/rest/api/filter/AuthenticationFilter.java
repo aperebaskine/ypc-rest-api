@@ -33,7 +33,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 		
-		if (auth == null) {
+		if (auth == null) { // User is unauthenticated, verification not needed
 			return;
 		}
 
