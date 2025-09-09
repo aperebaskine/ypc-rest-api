@@ -41,17 +41,19 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-
-		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION).trim();
 		
 		if (isPublicEndpoint(requestContext)) {
 			return;
 		}
 		
+		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION).trim();
+		
 		if (auth == null) {
 			logger.warn("An unauthenticated user attempted to call an auth-gated endpoint. Public endpoints must declare the @Public annotation.");
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		}
+		
+		auth = auth.trim();
 		
 		if (!auth.startsWith("Bearer ")) {
 			logger.warn("An user attempted to call an auth-gated endpoint with a malformed authorization header.");
