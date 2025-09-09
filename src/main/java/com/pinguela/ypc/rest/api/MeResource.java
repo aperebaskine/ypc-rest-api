@@ -3,7 +3,6 @@ package com.pinguela.ypc.rest.api;
 import java.util.Locale;
 
 import com.pinguela.yourpc.model.Address;
-import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.CustomerOrderService;
 import com.pinguela.yourpc.service.CustomerService;
@@ -11,6 +10,7 @@ import com.pinguela.yourpc.service.impl.AddressServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.constants.Roles;
+import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
 import com.pinguela.ypc.rest.api.model.UserPrincipal;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
@@ -63,14 +63,14 @@ public class MeResource {
 	@Operation(
 			method = "GET",
 			operationId = "findAuthenticatedCustomer",
-			description = "Retrieve user data from session token", 
+			description = "Retrieve the currently authenticated customer's data", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved customer information",
+							description = "Successfully retrieved customer data",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = Customer.class)
+									schema = @Schema(implementation = CustomerDTOMixin.class)
 									)
 							),
 					@ApiResponse(
@@ -94,15 +94,15 @@ public class MeResource {
 							responseCode = "200", 
 							description = "Successfully retrieved addresses",
 							content = @Content(
-									mediaType = "application/json",
+									mediaType = MediaType.APPLICATION_JSON,
 									array = @ArraySchema(
 											schema = @Schema(implementation = Address.class)
 											)
 									)
 							),
 					@ApiResponse(
-							responseCode = "500",
-							description = "Unknown error"
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
 	public Response findAddresses() {
@@ -114,7 +114,7 @@ public class MeResource {
 	@Operation(
 			method = "GET",
 			operationId = "findAuthenticatedCustomerOrders",
-			description = "Retrieve all orders from the user.",
+			description = "Retrieve the authenticated customer's orders",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
@@ -128,7 +128,11 @@ public class MeResource {
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in parameter"
+							description = "Malformed parameter(s) in request"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
 	public Response findOrders(

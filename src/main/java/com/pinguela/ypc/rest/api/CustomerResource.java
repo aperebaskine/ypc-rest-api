@@ -12,6 +12,7 @@ import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.constants.Roles;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
+import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.util.TokenManager;
@@ -22,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -39,6 +41,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Path("/customer")
+@Tag(name = "customer")
 public class CustomerResource {
 
 	private static Logger logger = LogManager.getLogger(CustomerResource.class);
@@ -70,17 +73,16 @@ public class CustomerResource {
 											format = "byte"
 											)
 									)
-							), 
-					@ApiResponse(
-							responseCode = "404",
-							description = "Customer not found"
 							),
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed request"
 							),
-			},
-			tags = {"customer_public"})
+					@ApiResponse(
+							responseCode = "404",
+							description = "Customer not found"
+							)
+			})
 	public Response login(
 			@FormParam("email") @Email @NotNull String email,
 			@FormParam("password") @NotNull String password
@@ -94,7 +96,7 @@ public class CustomerResource {
 		} catch (InvalidLoginCredentialsException e) {
 			return Response.status(Status.NOT_FOUND).build();
 		} catch (YPCException e) {
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
 		return ResponseWrapper.wrap(() -> tokenManager.encodeToken(c));
@@ -108,7 +110,7 @@ public class CustomerResource {
 	@Operation(
 			method = "POST",
 			operationId = "registerCustomer",
-			description = "Create a customer account", 
+			description = "Creates a customer account, returning a JWT containing 'name', 'fullName' and 'role' claims", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
@@ -125,8 +127,7 @@ public class CustomerResource {
 									schema = @Schema(implementation = ErrorLog.class)
 									)
 							)
-			},
-			tags = {"customer_public"})
+			})
 	public Response register(
 			@FormParam("firstName") @NotNull String firstName,
 			@FormParam("lastName1") @NotNull String lastName1,
@@ -154,7 +155,7 @@ public class CustomerResource {
 					Customer createdCustomer = customerService.findById(id);
 
 					if (createdCustomer == null) {
-						throw new WebApplicationException(Status.BAD_REQUEST);
+						throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 					}
 
 					return tokenManager.encodeToken(createdCustomer);
@@ -168,23 +169,30 @@ public class CustomerResource {
 	@Operation(
 			method = "GET",
 			operationId = "findCustomerById",
-			description = "Retrieve user data from session token", 
+			description = "Retrieve customer data from their ID. Roles allowed: admin, hr, support", 
 			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved user data.",
+							description = "Successfully retrieved customer data",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = Customer.class)
+									schema = @Schema(implementation = CustomerDTOMixin.class)
 									)
 							),
 					@ApiResponse(
+							responseCode = "400",
+							description = "Malformed request"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
+							),
+					@ApiResponse(
 							responseCode = "404",
-							description = "No user associated with session token"
+							description = "No customer found"
 							)
-			}, 
-			tags = {"customer"})
+			})
 	public Response findById(
 			@PathParam("customerId") Integer customerId
 			) {
@@ -212,8 +220,7 @@ public class CustomerResource {
 							responseCode = "404",
 							description = "Email doesn't exist"
 							)
-			},
-			tags = {"customer_public"})
+			})
 	public Response exists(
 			@PathParam("email") @Email @NotNull String email
 			) {
@@ -236,23 +243,30 @@ public class CustomerResource {
 	@Operation(
 			method = "GET",
 			operationId = "findCustomerByEmail",
-			description = "Check whether an email is already in use.", 
+			description = "Retrieve customer data from their email. Roles allowed: admin, hr, support", 
 			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved user data.",
+							description = "Successfully retrieved customer data",
 							content = @Content(
 									mediaType = "application/json",
 									schema = @Schema(implementation = Customer.class)
 									)
 							),
 					@ApiResponse(
+							responseCode = "400",
+							description = "Email parameter is malformed"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
+							),
+					@ApiResponse(
 							responseCode = "404",
-							description = "No user associated with session token"
+							description = "No customer found"
 							)
-			},
-			tags = {"customer"})
+			})
 	public Response findByEmail(
 			@PathParam("email") @Email @NotNull String email
 			) {
