@@ -64,7 +64,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		try {
 			user = tokenManager.decodeToken(token);
 		} catch (InvalidTokenException e) {
-			logger.warn("The validity of an authentication token could not be verified.", e);
+			logger.warn("An user attempted to call an auth-gated endpoint with an invalid or expired token.", e);
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		}
 		
