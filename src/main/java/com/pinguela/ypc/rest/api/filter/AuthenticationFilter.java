@@ -32,7 +32,7 @@ import jakarta.ws.rs.ext.Provider;
 public class AuthenticationFilter implements ContainerRequestFilter {
 	
 	private static Logger logger = LogManager.getLogger(AuthenticationFilter.class);
-	private static final Cache<Method, Boolean> CACHE = CacheManager.getInstance().getCache("authMethod", Method.class, Boolean.class);
+	private static final Cache<Method, Boolean> CACHE = CacheManager.getInstance().getCache("isEndpointAuthGated", Method.class, Boolean.class);
 	
 	private TokenManager tokenManager = TokenManager.getInstance();
 	
@@ -54,7 +54,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		}
 		
 		if (!auth.startsWith("Bearer ")) {
-			logger.warn("An user attempted to call an auth-gated endpoint with a malformed authorization token.");
+			logger.warn("An user attempted to call an auth-gated endpoint with a malformed authorization header.");
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		}
 		
