@@ -11,7 +11,7 @@ import com.pinguela.yourpc.service.impl.AddressServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.constants.Roles;
-import com.pinguela.ypc.rest.api.model.UserPrincipal;
+import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -52,11 +52,6 @@ public class MeResource {
 		orderService = new CustomerOrderServiceImpl();
 	}
 
-	private Integer getUserId() {
-		UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
-		return principal.getId();
-	}
-
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -79,7 +74,8 @@ public class MeResource {
 							)
 			})
 	public Response find() {
-		return ResponseWrapper.wrap(() -> customerService.findById(getUserId()), Status.NOT_FOUND);
+		Integer userId = AuthUtils.getUserId(securityContext);
+		return ResponseWrapper.wrap(() -> customerService.findById(userId), Status.NOT_FOUND);
 	}
 
 	@GET
@@ -106,7 +102,8 @@ public class MeResource {
 							)
 			})
 	public Response findAddresses() {
-		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(getUserId()), Status.OK);
+		Integer userId = AuthUtils.getUserId(securityContext);
+		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(userId), Status.OK);
 	}
 
 	@GET
@@ -134,8 +131,9 @@ public class MeResource {
 	public Response findOrders(
 			@PathParam("locale") String locale
 			) {
+		Integer userId = AuthUtils.getUserId(securityContext);
 		Locale l = LocaleUtils.getLocale(locale);
-		return ResponseWrapper.wrap(() -> orderService.findByCustomer(getUserId(), l));
+		return ResponseWrapper.wrap(() -> orderService.findByCustomer(userId, l));
 	}
 
 }
