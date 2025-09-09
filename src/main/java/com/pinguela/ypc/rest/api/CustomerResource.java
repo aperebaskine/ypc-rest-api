@@ -1,8 +1,6 @@
 
 package com.pinguela.ypc.rest.api;
 
-import org.apache.commons.validator.GenericValidator;
-
 import com.pinguela.InvalidLoginCredentialsException;
 import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.Customer;
@@ -11,7 +9,6 @@ import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.annotations.Public;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
-import com.pinguela.ypc.rest.api.model.Exists;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.util.TokenManager;
@@ -22,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -29,8 +27,8 @@ import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -39,6 +37,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
 @Path("/customer")
+@Tag(name = "customer", description = "Endpoints for handling customer-related requests")
 public class CustomerResource {
 
 	private TokenManager tokenManager = TokenManager.getInstance();
@@ -52,7 +51,7 @@ public class CustomerResource {
 	@Public
 	@Path("/login")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
 			method = "POST",
 			operationId = "loginCustomer",
@@ -62,7 +61,11 @@ public class CustomerResource {
 							responseCode = "200", 
 							description = "Successfully logged in, returning session token",
 							content = @Content(
-									mediaType = "text/plain"
+									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT,
+									schema = @Schema(
+											type = "string",
+											format = "byte"
+											)
 									)
 							), 
 					@ApiResponse(
@@ -184,37 +187,33 @@ public class CustomerResource {
 
 	@GET
 	@Public
-	@Path("/exists")
+	@Path("/{email}/exists")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
 			operationId = "exists",
-			description = "Check whether an email and/or phone number is already in use", 
+			description = "Check whether an email is already in use.", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved whether email or phone number exists",
+							description = "Successfully checked for email's existence",
 							content = @Content(
 									schema = @Schema(
-											implementation = Exists.class
+											type = "boolean"
 											),
 									mediaType = MediaType.APPLICATION_JSON
 									)
 							),
 					@ApiResponse(
-							responseCode = "500",
-							description = "Unknown error occured"
+							responseCode = "400",
+							description = "Email parameter is malformed"
 							)
 			})
 	public Response exists(
-			@QueryParam("email") @Email String email,
-			@QueryParam("phoneNumber") String phoneNumber
+			@PathParam("email") @Email @NotNull String email
 			) {
 		return ResponseWrapper.wrap(() -> {
-			return new Exists(
-					GenericValidator.isBlankOrNull(email) ? null : this.customerService.emailExists(email),
-							GenericValidator.isBlankOrNull(phoneNumber) ? null : this.customerService.phoneNumberExists(phoneNumber)
-					);
+			return this.customerService.emailExists(email);
 		});
 	}
 
