@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -35,20 +36,25 @@ import jakarta.ws.rs.core.SecurityContext;
 @Path("/me")
 @RolesAllowed(Roles.CUSTOMER)
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "me", description = "Endpoints for customer-facing application. Allowed roles: customer")
 public class MeResource {
 
 	private CustomerService customerService;
 	private AddressService addressService;
 	private CustomerOrderService orderService;
 
-	private final UserPrincipal principal;
+	@Context 
+	private SecurityContext securityContext;
 
-	public MeResource(@Context SecurityContext context) {
+	public MeResource() {
 		customerService = new CustomerServiceImpl();
 		addressService = new AddressServiceImpl();
 		orderService = new CustomerOrderServiceImpl();
+	}
 
-		principal = (UserPrincipal) context.getUserPrincipal();
+	private Integer getUserId() {
+		UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
+		return principal.getId();
 	}
 
 	@GET
@@ -61,19 +67,19 @@ public class MeResource {
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved user data.",
+							description = "Successfully retrieved customer information",
 							content = @Content(
 									mediaType = "application/json",
 									schema = @Schema(implementation = Customer.class)
 									)
 							),
 					@ApiResponse(
-							responseCode = "404",
-							description = "No user associated with session token"
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
 	public Response find() {
-		return ResponseWrapper.wrap(() -> customerService.findById(principal.getId()), Status.NOT_FOUND);
+		return ResponseWrapper.wrap(() -> customerService.findById(getUserId()), Status.NOT_FOUND);
 	}
 
 	@GET
@@ -100,7 +106,7 @@ public class MeResource {
 							)
 			})
 	public Response findAddresses() {
-		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(principal.getId()), Status.OK);
+		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(getUserId()), Status.OK);
 	}
 
 	@GET
@@ -129,7 +135,7 @@ public class MeResource {
 			@PathParam("locale") String locale
 			) {
 		Locale l = LocaleUtils.getLocale(locale);
-		return ResponseWrapper.wrap(() -> orderService.findByCustomer(principal.getId(), l));
+		return ResponseWrapper.wrap(() -> orderService.findByCustomer(getUserId(), l));
 	}
 
 }

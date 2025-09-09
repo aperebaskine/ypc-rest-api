@@ -2,6 +2,7 @@ package com.pinguela.ypc.rest.api;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.glassfish.jersey.server.validation.ValidationFeature;
 
 import com.pinguela.ypc.rest.api.schema.AttributeValueModelConverter;
 
@@ -46,6 +47,9 @@ public class YPCApplication extends ResourceConfig {
 		
 		// RBAC enforcer
 		register(RolesAllowedDynamicFeature.class);
+		
+		// Parameter validator
+		register(ValidationFeature.class);
 
 		// Attribute value schema creator
 		ModelConverters.getInstance().addConverter(new AttributeValueModelConverter());
