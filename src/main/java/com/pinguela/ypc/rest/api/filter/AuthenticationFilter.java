@@ -46,7 +46,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 			return;
 		}
 		
-		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION).trim();
+		String auth = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 		
 		if (auth == null) {
 			logger.warn("An unauthenticated user attempted to call an auth-gated endpoint. Public endpoints must declare the @Public annotation.");
