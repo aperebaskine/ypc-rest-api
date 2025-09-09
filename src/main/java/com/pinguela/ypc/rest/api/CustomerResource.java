@@ -10,9 +10,9 @@ import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.annotations.Public;
+import com.pinguela.ypc.rest.api.constants.Roles;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.model.ErrorLog;
-import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.util.TokenManager;
 import com.pinguela.ypc.rest.api.validation.Validators;
@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -33,15 +34,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
 
 @Path("/customer")
 public class CustomerResource {
-	
+
 	private static Logger logger = LogManager.getLogger(CustomerResource.class);
 
 	private TokenManager tokenManager = TokenManager.getInstance();
@@ -59,11 +58,11 @@ public class CustomerResource {
 	@Operation(
 			method = "POST",
 			operationId = "loginCustomer",
-			description = "Authenticates the customer, returning their info.", 
+			description = "Authenticates the customer, returning a JWT containing 'name', 'fullName' and 'role' claims", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully logged in, returning session token",
+							description = "Successfully logged in",
 							content = @Content(
 									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT,
 									schema = @Schema(
@@ -78,7 +77,7 @@ public class CustomerResource {
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in request"
+							description = "Malformed request"
 							),
 			},
 			tags = {"customer_public"})
@@ -113,14 +112,14 @@ public class CustomerResource {
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully registered.",
+							description = "Successfully registered",
 							content = @Content(
 									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT
 									)
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in request",
+							description = "Malformed request",
 							content = @Content(
 									mediaType = "application/json",
 									schema = @Schema(implementation = ErrorLog.class)
@@ -163,11 +162,12 @@ public class CustomerResource {
 	}
 
 	@GET
-	@Path("/")
+	@Path("/{customerId:^\\d+$}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
 	@Operation(
 			method = "GET",
-			operationId = "getAuthenticatedUser",
+			operationId = "findCustomerById",
 			description = "Retrieve user data from session token", 
 			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
@@ -183,22 +183,22 @@ public class CustomerResource {
 							responseCode = "404",
 							description = "No user associated with session token"
 							)
-			}, tags = {"customer"})
-	public Response getAuthenticatedUser(
-			@Context SecurityContext securityContext
+			}, 
+			tags = {"customer"})
+	public Response findById(
+			@PathParam("customerId") Integer customerId
 			) {
-		Integer id = AuthUtils.getUserId(securityContext);
-		return ResponseWrapper.wrap(() -> customerService.findById(id), Status.NOT_FOUND);
+		return ResponseWrapper.wrap(() -> customerService.findById(customerId), Status.NOT_FOUND);
 	}
 
 	@HEAD
 	@Public
-	@Path("/{email}")
+	@Path("/{customerEmail}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "HEAD",
-			operationId = "exists",
-			description = "Check whether an email is already in use.", 
+			operationId = "customerEmailExists",
+			description = "Check whether an email is already in use by a customer", 
 			responses = {
 					@ApiResponse(
 							responseCode = "204", 
@@ -218,16 +218,45 @@ public class CustomerResource {
 			@PathParam("email") @Email @NotNull String email
 			) {
 		boolean exists;
-		
+
 		try {
 			exists = customerService.emailExists(email);
 		} catch (YPCException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 		}
-		
-		return Response.status(exists ? Status.OK : Status.NOT_FOUND).build();
-				
+
+		return Response.status(exists ? Status.OK : Status.NOT_FOUND).build();			
+	}
+
+	@GET
+	@Path("/{customerEmail}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
+	@Operation(
+			method = "GET",
+			operationId = "findCustomerByEmail",
+			description = "Check whether an email is already in use.", 
+			security = @SecurityRequirement(name = "bearerAuth"),
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully retrieved user data.",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = Customer.class)
+									)
+							),
+					@ApiResponse(
+							responseCode = "404",
+							description = "No user associated with session token"
+							)
+			},
+			tags = {"customer"})
+	public Response findByEmail(
+			@PathParam("email") @Email @NotNull String email
+			) {
+		return ResponseWrapper.wrap(() -> customerService.findByEmail(email), Status.NOT_FOUND);	
 	}
 
 }

@@ -31,7 +31,7 @@ import jakarta.ws.rs.ApplicationPath;
 						)
 		},
 		tags = {
-				@Tag(name = "customer", description = "Endpoints for requests handling logic related to customers"),
+				@Tag(name = "customer", description = "Endpoints for requests handling logic related to customers. Roles allowed: admin, hr, support"),
 				@Tag(name = "customer_public", description = "Endpoints for non auth-gated customer operations"),
 				@Tag(name = "me", description = "Endpoints for customer-facing application. Allowed roles: customer")
 		})
