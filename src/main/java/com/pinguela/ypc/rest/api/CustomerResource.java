@@ -100,7 +100,7 @@ public class CustomerResource {
 	@Public
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
 			method = "POST",
 			operationId = "registerCustomer",
@@ -110,7 +110,7 @@ public class CustomerResource {
 							responseCode = "200", 
 							description = "Successfully registered.",
 							content = @Content(
-									mediaType = "text/plain"
+									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT
 									)
 							),
 					@ApiResponse(
