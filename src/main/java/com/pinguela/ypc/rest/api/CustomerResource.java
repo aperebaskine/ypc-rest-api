@@ -1,6 +1,9 @@
 
 package com.pinguela.ypc.rest.api;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.pinguela.InvalidLoginCredentialsException;
 import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.Customer;
@@ -25,6 +28,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -37,8 +41,9 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
 @Path("/customer")
-@Tag(name = "customer", description = "Endpoints for handling customer-related requests")
 public class CustomerResource {
+	
+	private static Logger logger = LogManager.getLogger(CustomerResource.class);
 
 	private TokenManager tokenManager = TokenManager.getInstance();
 	private CustomerService customerService;
@@ -75,8 +80,9 @@ public class CustomerResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Error in request"
-							)
-			})
+							),
+			},
+			tags = {"customer_public"})
 	public Response login(
 			@FormParam("email") @Email @NotNull String email,
 			@FormParam("password") @NotNull String password
@@ -121,7 +127,8 @@ public class CustomerResource {
 									schema = @Schema(implementation = ErrorLog.class)
 									)
 							)
-			})
+			},
+			tags = {"customer_public"})
 	public Response register(
 			@FormParam("firstName") @NotNull String firstName,
 			@FormParam("lastName1") @NotNull String lastName1,
@@ -177,7 +184,7 @@ public class CustomerResource {
 							responseCode = "404",
 							description = "No user associated with session token"
 							)
-			})
+			}, tags = {"customer"})
 	public Response getAuthenticatedUser(
 			@Context SecurityContext securityContext
 			) {
@@ -185,36 +192,43 @@ public class CustomerResource {
 		return ResponseWrapper.wrap(() -> customerService.findById(id), Status.NOT_FOUND);
 	}
 
-	@GET
+	@HEAD
 	@Public
-	@Path("/{email}/exists")
+	@Path("/{email}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
-			method = "GET",
+			method = "HEAD",
 			operationId = "exists",
 			description = "Check whether an email is already in use.", 
 			responses = {
 					@ApiResponse(
-							responseCode = "200", 
-							description = "Successfully checked for email's existence",
-							content = @Content(
-									schema = @Schema(
-											type = "boolean"
-											),
-									mediaType = MediaType.APPLICATION_JSON
-									)
+							responseCode = "204", 
+							description = "Email already exists"
 							),
 					@ApiResponse(
 							responseCode = "400",
 							description = "Email parameter is malformed"
+							),
+					@ApiResponse(
+							responseCode = "404",
+							description = "Email doesn't exist"
 							)
-			})
+			},
+			tags = {"customer_public"})
 	public Response exists(
 			@PathParam("email") @Email @NotNull String email
 			) {
-		return ResponseWrapper.wrap(() -> {
-			return this.customerService.emailExists(email);
-		});
+		boolean exists;
+		
+		try {
+			exists = customerService.emailExists(email);
+		} catch (YPCException e) {
+			logger.error(e);
+			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+		}
+		
+		return Response.status(exists ? Status.OK : Status.NOT_FOUND).build();
+				
 	}
 
 }

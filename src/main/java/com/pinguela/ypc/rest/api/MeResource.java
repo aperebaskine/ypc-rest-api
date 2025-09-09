@@ -36,7 +36,7 @@ import jakarta.ws.rs.core.SecurityContext;
 @Path("/me")
 @RolesAllowed(Roles.CUSTOMER)
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "me", description = "Endpoints for customer-facing application. Allowed roles: customer")
+@Tag(name = "me")
 public class MeResource {
 
 	private CustomerService customerService;

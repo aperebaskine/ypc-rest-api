@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.ApplicationPath;
 
 @OpenAPIDefinition(
@@ -28,6 +29,11 @@ import jakarta.ws.rs.ApplicationPath;
 						url = "http://localhost:8080/ypc-rest-api/", 
 						description = "Local testing server"
 						)
+		},
+		tags = {
+				@Tag(name = "customer", description = "Endpoints for requests handling logic related to customers"),
+				@Tag(name = "customer_public", description = "Endpoints for non auth-gated customer operations"),
+				@Tag(name = "me", description = "Endpoints for customer-facing application. Allowed roles: customer")
 		})
 @SecurityScheme(
 		name = "bearerAuth",
