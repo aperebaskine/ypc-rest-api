@@ -2,7 +2,7 @@ package com.pinguela.ypc.rest.api;
 
 import java.util.Locale;
 
-import com.pinguela.yourpc.model.Address;
+import com.pinguela.yourpc.model.CustomerOrder;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.CustomerOrderService;
 import com.pinguela.yourpc.service.CustomerService;
@@ -10,6 +10,7 @@ import com.pinguela.yourpc.service.impl.AddressServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.constants.Roles;
+import com.pinguela.ypc.rest.api.model.AddressDTOMixin;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
 import com.pinguela.ypc.rest.api.model.UserPrincipal;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
@@ -96,7 +97,7 @@ public class MeResource {
 							content = @Content(
 									mediaType = MediaType.APPLICATION_JSON,
 									array = @ArraySchema(
-											schema = @Schema(implementation = Address.class)
+											schema = @Schema(implementation = AddressDTOMixin.class)
 											)
 									)
 							),
@@ -122,7 +123,7 @@ public class MeResource {
 							content = @Content(
 									mediaType = "application/json",
 									array = @ArraySchema(
-											schema = @Schema(implementation = Address.class)
+											schema = @Schema(implementation = CustomerOrder.class)
 											)
 									)
 							),

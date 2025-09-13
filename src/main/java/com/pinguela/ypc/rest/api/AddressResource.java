@@ -3,7 +3,8 @@ package com.pinguela.ypc.rest.api;
 import com.pinguela.yourpc.model.Address;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.impl.AddressServiceImpl;
-import com.pinguela.ypc.rest.api.util.AuthUtils;
+import com.pinguela.ypc.rest.api.constants.Roles;
+import com.pinguela.ypc.rest.api.model.AddressDTOMixin;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -30,9 +32,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/address")
-@RolesAllowed("admin")
+@Path("/")
+@RolesAllowed({Roles.ADMIN, Roles.HR})
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "address")
 public class AddressResource {
 
 	private AddressService addressService;
@@ -42,67 +45,68 @@ public class AddressResource {
 	}
 
 	@GET
-	@Path("/{id}")
+	@Path("/address/{addressId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
 			operationId = "findAddressById",
-			description = "Retrieve an address.",
+			description = "Retrieve an address",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
 							description = "Successfully retrieved address",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = Address.class)
+									schema = @Schema(implementation = AddressDTOMixin.class)
 									)
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in parameter"
+							description = "Malformed path parameter"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
+							),
+					@ApiResponse(
+							responseCode = "404",
+							description = "No address found"
 							)
 			})
-	public Response findById(
-			@PathParam("id") Integer id,
-			@Context ContainerRequestContext context
-			) {
-		return ResponseWrapper.wrap(
-				() -> {
-					Integer customerId = AuthUtils.getUserId(context);
-					Address a = this.addressService.findById(id);
-
-					if (!a.getCustomerId().equals(customerId)) {
-						throw new WebApplicationException(Status.BAD_REQUEST);
-					}
-
-					return a;
-				}
-				);
+	public Response findById(@PathParam("addressId") Integer addressId) {
+		return ResponseWrapper.wrap(() -> this.addressService.findById(addressId));
 	}
 
 	@POST
-	@Path("/")
+	@Path("/address")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "POST",
 			operationId = "createAddress",
-			description = "Create an address.",
+			description = "Create an address",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
 							description = "Successfully created address",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = Address.class)
+									schema = @Schema(implementation = AddressDTOMixin.class)
 									)
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in parameter"
+							description = "Malformed parameter(s)"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
 	public Response create(
+			@FormParam("name") String name,
+			@FormParam("customerId") Integer customerId,
+			@FormParam("employeeId") Integer employeeId,
 			@FormParam("streetName") @NotNull String streetName,
 			@FormParam("streetNumber") Short streetNumber,
 			@FormParam("floor") Short floor,
@@ -115,10 +119,10 @@ public class AddressResource {
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					Integer customerId = AuthUtils.getUserId(context);
-
 					Address a = new Address();
+					a.setName(name);
 					a.setCustomerId(customerId);
+					a.setEmployeeId(employeeId);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
 					a.setFloor(floor);
@@ -141,29 +145,36 @@ public class AddressResource {
 	}
 
 	@PUT
-	@Path("/")
+	@Path("/address/{addressId}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "PUT",
 			operationId = "updateAddress",
-			description = "Update an address.",
+			description = "Update an address",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully updated address",
+							description = "Successfully updated address. If it was associated with an order, the ID is updated",
 							content = @Content(
 									mediaType = "application/json",
-									schema = @Schema(implementation = Address.class)
+									schema = @Schema(implementation = AddressDTOMixin.class)
 									)
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in parameter"
+							description = "Malformed parameter(s)"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
 	public Response update(
-			@FormParam("id") @NotNull Integer id,
+			@PathParam("id") @NotNull Integer id,
+			@FormParam("name") String name,
+			@FormParam("customerId") Integer customerId,
+			@FormParam("employeeId") Integer employeeId,
 			@FormParam("streetName") @NotNull String streetName,
 			@FormParam("streetNumber") Short streetNumber,
 			@FormParam("floor") Short floor,
@@ -171,23 +182,18 @@ public class AddressResource {
 			@FormParam("zipCode") @NotNull String zipCode,
 			@FormParam("cityId") @NotNull Integer cityId,
 			@FormParam("isDefault") @NotNull Boolean isDefault,
-			@FormParam("isBilling") @NotNull Boolean isBilling,
-			@Context ContainerRequestContext context
+			@FormParam("isBilling") @NotNull Boolean isBilling
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					Integer customerId = AuthUtils.getUserId(context);
-
 					Address current = this.addressService.findById(id);
-
-					if (!current.getCustomerId().equals(customerId)) {
-						throw new WebApplicationException(Status.BAD_REQUEST);
-					}
 
 					Address a = new Address();
 					a.setId(id);
+					a.setName(name);
 					a.setCreationDate(current.getCreationDate());
 					a.setCustomerId(customerId);
+					a.setEmployeeId(employeeId);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
 					a.setFloor(floor);
@@ -211,7 +217,7 @@ public class AddressResource {
 
 
 	@DELETE
-	@Path("/{id}")
+	@Path("/address/{addressId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "DELETE",
@@ -224,34 +230,26 @@ public class AddressResource {
 							),
 					@ApiResponse(
 							responseCode = "400",
-							description = "Error in parameter"
+							description = "Malformed parameter(s)"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
 	public Response delete(
-			@PathParam("id") Integer id,
-			@Context ContainerRequestContext context
+			@PathParam("id") Integer id
 			) {
-		return ResponseWrapper.wrap(
-				() -> {
-					Integer customerId = AuthUtils.getUserId(context);
-					Address a = this.addressService.findById(id);
-
-					if (!a.getCustomerId().equals(customerId)) {
-						throw new WebApplicationException(Status.BAD_REQUEST);
-					}
-
-					return this.addressService.delete(id);
-				}
-				);
+		return ResponseWrapper.wrap(() -> this.addressService.delete(id));
 	}
 
 	@GET
-	@Path("/")
+	@Path("/addresses/{customerId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
-			operationId = "findAllAddresses",
-			description = "Retrieve all address for the given user.",
+			operationId = "findAddressesByCustomer",
+			description = "Retrieve all address for the given customer",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
@@ -259,21 +257,24 @@ public class AddressResource {
 							content = @Content(
 									mediaType = "application/json",
 									array = @ArraySchema(
-											schema = @Schema(implementation = Address.class)
+											schema = @Schema(implementation = AddressDTOMixin.class)
 											)
 									)
 							),
 					@ApiResponse(
-							responseCode = "500",
-							description = "Unknown error"
+							responseCode = "400",
+							description = "Malformed path parameter"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
-	public Response findAll(
-			@Context ContainerRequestContext context
+	public Response findByCustomer(
+			@PathParam("customerId") Integer customerId
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					Integer customerId = AuthUtils.getUserId(context);
 					return this.addressService.findByCustomer(customerId);
 				},
 				Status.OK, 
@@ -282,27 +283,30 @@ public class AddressResource {
 	}
 
 	@DELETE
-	@Path("/")
+	@Path("/addresses/{customerId}")
 	@Operation(
 			method = "DELETE",
-			operationId = "deleteAllAddresses",
-			description = "Delete all address for the given user.",
+			operationId = "deleteAddressesByCustomer",
+			description = "Delete all address for the given customer",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
 							description = "Successfully deleted addresses"
 							),
 					@ApiResponse(
-							responseCode = "500",
-							description = "Unknown error"
+							responseCode = "400",
+							description = "Malformed path parameter"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
 							)
 			})
-	public Response deleteAll(
-			@Context ContainerRequestContext context
+	public Response deleteByCustomer(
+			@PathParam("customerId") Integer customerId
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					Integer customerId = AuthUtils.getUserId(context);
 					return this.addressService.deleteByCustomer(customerId);
 				});
 	}

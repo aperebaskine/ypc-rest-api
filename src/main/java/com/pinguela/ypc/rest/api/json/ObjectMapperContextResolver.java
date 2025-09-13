@@ -2,9 +2,11 @@ package com.pinguela.ypc.rest.api.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.pinguela.yourpc.model.Address;
 import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
 import com.pinguela.yourpc.model.dto.LocalizedProductDTO;
+import com.pinguela.ypc.rest.api.model.AddressDTOMixin;
 import com.pinguela.ypc.rest.api.model.AttributeDTOMixin;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
 import com.pinguela.ypc.rest.api.model.ProductDTOMixin;
@@ -26,6 +28,7 @@ implements ContextResolver<ObjectMapper> {
 		module.setMixInAnnotation(AttributeDTO.class, AttributeDTOMixin.class);
 		module.setMixInAnnotation(LocalizedProductDTO.class, ProductDTOMixin.class);
 		module.setMixInAnnotation(Customer.class, CustomerDTOMixin.class);
+		module.setMixInAnnotation(Address.class, AddressDTOMixin.class);
 		
 		mapper.registerModule(module);
 	}
