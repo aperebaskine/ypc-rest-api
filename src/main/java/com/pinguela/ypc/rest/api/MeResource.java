@@ -2,6 +2,12 @@ package com.pinguela.ypc.rest.api;
 
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.pinguela.DataException;
+import com.pinguela.ServiceException;
+import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.CustomerOrder;
 import com.pinguela.yourpc.service.AddressService;
 import com.pinguela.yourpc.service.CustomerOrderService;
@@ -13,6 +19,7 @@ import com.pinguela.ypc.rest.api.constants.Roles;
 import com.pinguela.ypc.rest.api.model.AddressDTOMixin;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
 import com.pinguela.ypc.rest.api.model.UserPrincipal;
+import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -24,11 +31,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -40,6 +50,8 @@ import jakarta.ws.rs.core.SecurityContext;
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "me")
 public class MeResource {
+	
+	private static Logger logger = LogManager.getLogger(MeResource.class);
 
 	private CustomerService customerService;
 	private AddressService addressService;
@@ -142,6 +154,42 @@ public class MeResource {
 			) {
 		Locale l = LocaleUtils.getLocale(locale);
 		return ResponseWrapper.wrap(() -> orderService.findByCustomer(getUserId(), l));
+	}
+	
+	@PATCH
+	@Path("/password")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Operation(
+			method = "PATCH",
+			operationId = "updateMyPassword",
+			description = "Update the authenticated customer's password",
+			responses = {
+					@ApiResponse(
+							responseCode = "204", 
+							description = "Successfully updated password"
+							),
+					@ApiResponse(
+							responseCode = "400",
+							description = "Malformed password"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
+							)
+			})
+	public Response updatePassword(
+			@FormParam("password") String password
+			) {
+		Integer customerId = AuthUtils.getUserId(securityContext);
+		
+		try {
+			this.customerService.updatePassword(customerId, password);
+		} catch (YPCException e) {
+			logger.error(e);
+			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+		} 
+		
+		return Response.status(Status.NO_CONTENT).build();
 	}
 
 }
