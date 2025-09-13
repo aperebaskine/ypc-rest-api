@@ -104,7 +104,7 @@ public class OrderResource {
 							content = @Content(
 									mediaType = "application/json",
 									array = @ArraySchema(
-											schema = @Schema(implementation = Address.class)
+											schema = @Schema(implementation = CustomerOrder.class)
 											)
 									)
 							),
