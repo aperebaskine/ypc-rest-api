@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -63,7 +64,7 @@ public class MeResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
-			operationId = "findAuthenticatedCustomer",
+			operationId = "findMe",
 			description = "Retrieve the currently authenticated customer's data", 
 			responses = {
 					@ApiResponse(
@@ -88,7 +89,7 @@ public class MeResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
-			operationId = "findAuthenticatedCustomerAddresses",
+			operationId = "findMyAddresses",
 			description = "Retrieve all address for the authenticated customer.",
 			responses = {
 					@ApiResponse(
@@ -114,7 +115,7 @@ public class MeResource {
 	@Path("/{locale}/orders")
 	@Operation(
 			method = "GET",
-			operationId = "findAuthenticatedCustomerOrders",
+			operationId = "findMyOrders",
 			description = "Retrieve the authenticated customer's orders",
 			responses = {
 					@ApiResponse(
