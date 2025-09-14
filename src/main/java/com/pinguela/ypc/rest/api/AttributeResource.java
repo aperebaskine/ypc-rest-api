@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Public
-@Path("/attributes")
+@Path("/")
 @Tag(name = "product")
 public class AttributeResource {
 
@@ -38,7 +38,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}/{attributeId:\\d+}")
+	@Path("/attributes/{locale}/{attributeId:\\d+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -77,7 +77,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}/{attributeName}")
+	@Path("/attributes/{locale}/{attributeName}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -117,7 +117,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}")
+	@Path("/categories/{locale}/{categoryId:^\\d+$/attributes}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
