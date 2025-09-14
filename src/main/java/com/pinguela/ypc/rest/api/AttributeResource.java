@@ -143,7 +143,7 @@ public class AttributeResource {
 			})
 	public Response findByCategory(
 			@PathParam("locale") String locale,
-			@QueryParam("categoryId") Short categoryId,
+			@PathParam("categoryId") Short categoryId,
 			@QueryParam("unassignedValues") @DefaultValue("false") Boolean unassignedValues
 			) {
 		Locale l = Locale.forLanguageTag(locale);
