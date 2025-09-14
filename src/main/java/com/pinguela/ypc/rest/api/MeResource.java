@@ -79,7 +79,7 @@ import jakarta.ws.rs.core.SecurityContext;
 			),
 	@ApiResponse(
 			responseCode = "403",
-			description = "Caller lacks permissions to access the endpoint"
+			description = "Caller lacks sufficient permissions to access the endpoint"
 			)
 })
 public class MeResource {
