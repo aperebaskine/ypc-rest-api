@@ -20,7 +20,7 @@ import com.pinguela.yourpc.service.impl.AddressServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerOrderServiceImpl;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
-import com.pinguela.ypc.rest.api.util.AuthUtils;
+import com.pinguela.ypc.rest.api.constants.Roles;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 
@@ -30,9 +30,12 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -48,9 +51,24 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/order")
-@RolesAllowed("admin")
+@Path("/")
+@RolesAllowed({Roles.ADMIN, Roles.SUPPORT})
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "order")
+@ApiResponses({
+	@ApiResponse(
+			responseCode = "400",
+			description = "One or more request parameters is malformed"
+			),
+	@ApiResponse(
+			responseCode = "401",
+			description = "Caller is unauthenticated"
+			),
+	@ApiResponse(
+			responseCode = "403",
+			description = "Caller lacks sufficient permissions to access the endpoint"
+			)
+})
 public class OrderResource {
 
 	private ProductService productService;
@@ -66,71 +84,63 @@ public class OrderResource {
 	}
 
 	@GET
-	@Path("/{locale}/{id}")
+	@Path("/orders/{locale}/{orderId}")
 	@Operation(
 			method = "GET",
 			operationId = "findOrderById",
-			description = "Retrieve an order by its ID.",
+			description = "Retrieve an order by its ID",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved order",
+							description = "Successfully retrieved order data",
 							content = @Content(
-									mediaType = "application/json",
+									mediaType = MediaType.APPLICATION_JSON,
 									schema = @Schema(implementation = CustomerOrder.class)
 									)
-							),
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in parameter"
 							)
 			})
 	public Response findById(
 			@PathParam("locale") String locale,
-			@PathParam("id") Long id) {
-		return ResponseWrapper.wrap(() -> orderService.findById(id, LocaleUtils.getLocale(locale)));
+			@PathParam("orderId") Long orderId
+			) {
+		return ResponseWrapper.wrap(() -> orderService.findById(orderId, LocaleUtils.getLocale(locale)));
 	}
 
 	@GET
-	@Path("/{locale}")
+	@Path("/customers/{customerId}/orders/{locale}")
 	@Operation(
 			method = "GET",
-			operationId = "findAllOrders",
-			description = "Retrieve all orders from the user.",
+			operationId = "findOrdersByCustomer",
+			description = "Retrieve all orders for a given customer",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved orders",
+							description = "Successfully retrieved user's orders",
 							content = @Content(
-									mediaType = "application/json",
+									mediaType = MediaType.APPLICATION_JSON,
 									array = @ArraySchema(
 											schema = @Schema(implementation = CustomerOrder.class)
 											)
 									)
-							),
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in parameter"
 							)
 			})
-	public Response findAll(
+	public Response findByCustomer(
+			@PathParam("customerId") Integer customerId,
 			@PathParam("locale") String locale,
 			@Context ContainerRequestContext context
 			) {
-
-		Integer customerId = AuthUtils.getUserId(context);
 		Locale l = LocaleUtils.getLocale(locale);
 		return ResponseWrapper.wrap(() -> orderService.findByCustomer(customerId, l));
 	}
 
 	@POST
-	@Path("/")
+	@Path("/orders")
 	@Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON})
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "Post",
 			operationId = "createOrder",
-			description = "Place an order as the given user.",
+			description = "Place an order for a given customer",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
@@ -139,15 +149,12 @@ public class OrderResource {
 									mediaType = "application/json",
 									schema = @Schema(implementation = CustomerOrder.class)
 									)
-							),
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in parameter"
 							)
 			})
 	public Response create(
-			@FormParam("billingAddressId") Integer billingAddressId,
-			@FormParam("shippingAddressId") Integer shippingAddressId,
+			@FormParam("customerId") @NotNull Integer customerId,
+			@FormParam("billingAddressId") @NotNull Integer billingAddressId,
+			@FormParam("shippingAddressId") @NotNull Integer shippingAddressId,
 			@FormParam("orderLines")
 			@Parameter(
 					schema = @Schema(
@@ -170,7 +177,6 @@ public class OrderResource {
 		}
 
 		try {
-			Integer customerId = AuthUtils.getUserId(context);
 			Customer c = this.customerService.findById(customerId);
 
 			Address billing = this.addressService.findById(billingAddressId);
@@ -208,7 +214,6 @@ public class OrderResource {
 		} catch (ServiceException | DataException e) {
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 		}
-
 	}
 
 	@GET
