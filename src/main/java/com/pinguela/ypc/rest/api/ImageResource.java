@@ -39,7 +39,7 @@ public class ImageResource {
 
 	@GET
 	@Public
-	@Path("/product/{id}/images")
+	@Path("/products/{id}/images")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(
 			method = "GET",
