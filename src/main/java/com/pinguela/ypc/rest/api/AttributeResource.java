@@ -117,7 +117,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/categories/{locale}/{categoryId:^\\d+$/attributes}")
+	@Path("/categories/{locale}/{categoryId:^\\d+$}/attributes")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
