@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -24,6 +25,12 @@ import jakarta.ws.rs.core.Response.Status;
 @Public
 @Path("/categories")
 @Tag(name = "product")
+@ApiResponses(
+		@ApiResponse(
+				responseCode = "400",
+				description = "One or more of the request parameters is malformed"
+				)
+		)
 public class CategoryResource {
 
 	private CategoryService categoryService;
@@ -38,13 +45,13 @@ public class CategoryResource {
 	@Operation(
 			method = "GET",
 			operationId = "findAllCategories",
-			description = "Return a list of all existing categories.",
+			description = "Retrieve a list of all existing categories",
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved category data",
+							description = "Successfully retrieved categories",
 							content = @Content(
-									mediaType = "application/json",
+									mediaType = MediaType.APPLICATION_JSON,
 									array = @ArraySchema(
 											schema = @Schema(
 													implementation = CategoryDTO.class
@@ -52,10 +59,7 @@ public class CategoryResource {
 											)
 									)
 							), 
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in received parameters"
-							)
+
 			}
 			)
 	public Response findAll(@PathParam("locale") String locale) {
