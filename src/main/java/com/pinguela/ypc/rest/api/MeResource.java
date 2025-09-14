@@ -47,6 +47,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
@@ -72,8 +73,18 @@ import jakarta.ws.rs.core.SecurityContext;
 @RolesAllowed(Roles.CUSTOMER)
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "me")
+@ApiResponses({
+	@ApiResponse(
+			responseCode = "401",
+			description = "Caller is unauthenticated"
+			),
+	@ApiResponse(
+			responseCode = "403",
+			description = "Caller lacks permissions to access the endpoint"
+			)
+})
 public class MeResource {
-	
+
 	private static Logger logger = LogManager.getLogger(MeResource.class);
 
 	private ProductService productService;
@@ -113,14 +124,6 @@ public class MeResource {
 									mediaType = "application/json",
 									schema = @Schema(implementation = CustomerDTOMixin.class)
 									)
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response find() {
@@ -144,20 +147,12 @@ public class MeResource {
 											schema = @Schema(implementation = AddressDTOMixin.class)
 											)
 									)
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response findAddresses() {
 		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(getUserId()), Status.OK);
 	}
-	
+
 	@POST
 	@Path("/addresses")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -178,14 +173,6 @@ public class MeResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed parameter(s)"
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response createAddress(
@@ -204,7 +191,7 @@ public class MeResource {
 				() -> {
 					Integer customerId = AuthUtils.getUserId(context);
 					Address a = new Address();
-					
+
 					a.setName(name);
 					a.setCustomerId(customerId);
 					a.setStreetName(streetName);
@@ -248,14 +235,6 @@ public class MeResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed parameter(s)"
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response updateAddress(
@@ -274,7 +253,7 @@ public class MeResource {
 				() -> {
 					Integer customerId = AuthUtils.getUserId(securityContext);
 					Address current = this.addressService.findById(customerId);
-					
+
 					if (current.getCustomerId().equals(customerId)) {
 						throw new WebApplicationException(Status.FORBIDDEN);
 					}
@@ -304,7 +283,7 @@ public class MeResource {
 				}
 				);
 	}
-	
+
 	@GET
 	@Path("/orders/{locale}/{orderId}")
 	@Operation(
@@ -325,14 +304,6 @@ public class MeResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed parameter(s) in request"
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response findOrder(
@@ -341,15 +312,15 @@ public class MeResource {
 			) {
 		Integer customerId = AuthUtils.getUserId(securityContext);
 		Locale l = LocaleUtils.getLocale(locale);
-		
-		
+
+
 		return ResponseWrapper.wrap(() -> {
 			CustomerOrder order = orderService.findById(orderId, l);
-			
+
 			if (!order.getCustomerId().equals(customerId)) {
 				throw new WebApplicationException(Status.FORBIDDEN);
 			}
-			
+
 			return order;
 		});
 	}
@@ -374,14 +345,6 @@ public class MeResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed parameter(s) in request"
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response findOrders(
@@ -390,7 +353,7 @@ public class MeResource {
 		Locale l = LocaleUtils.getLocale(locale);
 		return ResponseWrapper.wrap(() -> orderService.findByCustomer(getUserId(), l));
 	}
-	
+
 	@POST
 	@Path("/orders")
 	@Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON})
@@ -411,14 +374,6 @@ public class MeResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed parameter(s) in request"
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response createOrder(
@@ -484,7 +439,7 @@ public class MeResource {
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@PATCH
 	@Path("/password")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -500,31 +455,23 @@ public class MeResource {
 					@ApiResponse(
 							responseCode = "400",
 							description = "Malformed password"
-							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
 							)
 			})
 	public Response updatePassword(
 			@FormParam("password") String password
 			) {
 		Integer customerId = AuthUtils.getUserId(securityContext);
-		
+
 		try {
 			this.customerService.updatePassword(customerId, password);
 		} catch (YPCException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 		} 
-		
+
 		return Response.status(Status.NO_CONTENT).build();
 	}
-	
+
 	@GET
 	@Path("/avatar")
 	@Operation(
@@ -544,19 +491,10 @@ public class MeResource {
 									)
 							),
 					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permission"
-							),
-					@ApiResponse(
 							responseCode = "404",
 							description = "Avatar not found"
 							)
 			})
-	@SecurityRequirement(name = "bearerAuth")
 	public Response downloadAvatar(
 			@Context ContainerRequestContext context
 			) {
@@ -609,16 +547,8 @@ public class MeResource {
 							responseCode = "400",
 							description = "Error in request"
 							),
-					@ApiResponse(
-							responseCode = "401",
-							description = "Caller is unauthenticated"
-							),
-					@ApiResponse(
-							responseCode = "403",
-							description = "Caller lacks permissions"
-							)
+
 			})
-	@SecurityRequirement(name = "bearerAuth")
 	public Response uploadAvatar(
 			@FormDataParam("file") @NotNull InputStream is,
 			@Context ContainerRequestContext context
