@@ -4,14 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.ProductCriteria;
 import com.pinguela.yourpc.model.Results;
 import com.pinguela.yourpc.model.dto.AttributeDTO;
-import com.pinguela.yourpc.model.dto.ProductDTO;
 import com.pinguela.yourpc.service.ProductService;
 import com.pinguela.yourpc.service.impl.ProductServiceImpl;
 import com.pinguela.ypc.rest.api.annotations.Public;
@@ -23,10 +18,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -35,13 +30,16 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 
 @Path("/products")
 @Tag(name = "product")
+@ApiResponses(
+		@ApiResponse(
+				responseCode = "400",
+				description = "One or more of the request parameters is malformed"
+				)
+		)
 public class ProductResource {
-
-	private static Logger logger = LogManager.getLogger(ProductResource.class);
 
 	private ProductService productService;
 
@@ -56,13 +54,13 @@ public class ProductResource {
 	@Operation(
 			method = "GET",
 			operationId = "findProductById",
-			description = "Return product data in the specified language", 
+			description = "Retrieve information about a product", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
 							description = "Successfully retrieved product data",
 							content = @Content(
-									mediaType = "application/json",
+									mediaType = MediaType.APPLICATION_JSON,
 									schema = @Schema(implementation = ProductDTOMixin.class)
 									)
 							), 
@@ -71,27 +69,11 @@ public class ProductResource {
 							description = "Product not found"
 							)
 			})
-	public Response findById(@PathParam("locale") String locale, 
-			@PathParam("productId") @Min(1) Long productId) {
+	public Response findById(
+			@PathParam("locale") String locale, 
+			@PathParam("productId") @Min(1) Long productId
+			) {
 		return ResponseWrapper.wrap(() -> productService.findByIdLocalized(productId, Locale.forLanguageTag(locale)));
-	}
-
-	public Response create(@BeanParam ProductDTO dto) {
-
-		Long id = null;
-
-		try {
-			id = productService.create(dto);
-		} catch (YPCException e) {
-			logger.error("Error while inserting Product into database: {}", dto, e);
-		}
-
-		if (id == null) {
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-
-		dto.setId(id);
-		return Response.ok(dto).build();
 	}
 
 	@GET
@@ -101,19 +83,15 @@ public class ProductResource {
 	@Operation(
 			method = "GET",
 			operationId = "findProductBy",
-			description = "Return a list of products", 
+			description = "Return a paginated list of products based on the provided criteria", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved product data",
+							description = "Successfully retrieved product list",
 							content = @Content(
 									mediaType = "application/json",
 									schema = @Schema(implementation = ProductResults.class)
 									)
-							), 
-					@ApiResponse(
-							responseCode = "404",
-							description = "Products not found"
 							)
 			})
 	public Response findBy(
@@ -148,22 +126,21 @@ public class ProductResource {
 							type = "string",
 							format = "byte",
 							description = "Attribute list for GET requests in JSON format and Base64 encoded,"
-									+ " represented by its ID and values.",
-							example = "[{ id: 2, values: [2500, 3500] }, { id: 25, values: [true] }]"
+									+ " represented by its ID and values",
+									example = "[{ id: 2, values: [2500, 3500] }, { id: 25, values: [true] }]"
 							),
-					description = "List of attribute criteria, represented by their ID and list of values to filter."
+					description = "List of attribute criteria, represented by their ID and list of values to filter"
 					)
 			List<AttributeDTO<?>> attributes,
 			@QueryParam("orderBy") @DefaultValue(" pl.NAME") String orderBy,
 			@QueryParam("ascDesc") @DefaultValue("asc") String ascDesc
 			) {
-
 		ProductCriteria criteria = new ProductCriteria(name, launchDateMin, launchDateMax, 
 				stockMin, stockMax, priceMin, priceMax, categoryId, attributes);
-		
+
 		criteria.setOrderBy(orderBy);
 		criteria.setAscDesc("asc".equals(ascDesc));
-		
+
 		return ResponseWrapper.wrap(() -> productService.findBy(criteria, Locale.forLanguageTag(locale), pos, pageSize));
 	}
 
