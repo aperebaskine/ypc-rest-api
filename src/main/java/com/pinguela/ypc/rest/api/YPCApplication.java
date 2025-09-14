@@ -35,7 +35,8 @@ import jakarta.ws.rs.ApplicationPath;
 				@Tag(name = "customer", description = "Endpoints for requests handling logic related to customers"),
 				@Tag(name = "me", description = "Endpoints for customer-facing application. Allowed roles: customer"),
 				@Tag(name = "address", description = "Endpoints for requests handling logic related to addresses. Allowed roles: admin, hr"),
-				@Tag(name = "geo", description = "Endpoints for retrieving data about administrative units of supported countries")
+				@Tag(name = "geo", description = "Endpoints for retrieving data about administrative units of supported countries"),
+				@Tag(name = "identity", description = "Endpoints for retrieving data used for user identification")
 		})
 @SecurityScheme(
 		name = "bearerAuth",

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -19,36 +20,33 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Public
-@Path("/doctypes")
+@Path("/id-types")
+@Tag(name = "identity")
 public class DocumentTypeResource {
-		
+
 	private DocumentTypeService docTypeService;
-	
+
 	public DocumentTypeResource() {
 		this.docTypeService = new DocumentTypeServiceImpl();
 	}
-	
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
 			operationId = "findAllDoctypes",
-			description = "Find all supported document types", 
+			description = "Retrieve all supported types of ID documents", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully retrieved document type list.",
+							description = "Successfully retrieved document type list",
 							content = @Content(
 									mediaType = "application/json",
 									array = @ArraySchema(
 											schema = @Schema(implementation = DocumentType.class)
 											)
 									)
-							),
-					@ApiResponse(
-							responseCode = "500",
-							description = "Unknown error occured"
 							)
 			})
 	public Response findAll() {
