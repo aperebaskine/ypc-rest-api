@@ -39,7 +39,7 @@ public class ImageResource {
 
 	@GET
 	@Public
-	@Path("/products/{id}/images")
+	@Path("/products/{productId}/images")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(
 			method = "GET",
@@ -64,7 +64,7 @@ public class ImageResource {
 			})
 	@Tag(name = "product")
 	public Response getProductImage(
-			@PathParam("id") Integer productId
+			@PathParam("productId") Integer productId
 			) {
 		try {
 			List<InputStream> images = this.imageFileService.getInputStreams("product", productId);
