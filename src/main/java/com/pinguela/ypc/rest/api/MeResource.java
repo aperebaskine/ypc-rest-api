@@ -34,7 +34,6 @@ import com.pinguela.yourpc.service.impl.ProductServiceImpl;
 import com.pinguela.ypc.rest.api.constants.Roles;
 import com.pinguela.ypc.rest.api.model.AddressDTOMixin;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
-import com.pinguela.ypc.rest.api.model.UserPrincipal;
 import com.pinguela.ypc.rest.api.util.AuthUtils;
 import com.pinguela.ypc.rest.api.util.LocaleUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
@@ -104,11 +103,6 @@ public class MeResource {
 		imageFileService = new ImageFileServiceImpl();
 	}
 
-	private Integer getUserId() {
-		UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
-		return principal.getId();
-	}
-
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -127,7 +121,8 @@ public class MeResource {
 							)
 			})
 	public Response find() {
-		return ResponseWrapper.wrap(() -> customerService.findById(getUserId()), Status.NOT_FOUND);
+		Integer customerId = AuthUtils.getUserId(securityContext);
+		return ResponseWrapper.wrap(() -> customerService.findById(customerId), Status.NOT_FOUND);
 	}
 
 	@GET
@@ -150,7 +145,8 @@ public class MeResource {
 							)
 			})
 	public Response findAddresses() {
-		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(getUserId()), Status.OK);
+		Integer customerId = AuthUtils.getUserId(securityContext);
+		return ResponseWrapper.wrap(() -> this.addressService.findByCustomer(customerId), Status.OK);
 	}
 
 	@POST
@@ -350,8 +346,9 @@ public class MeResource {
 	public Response findOrders(
 			@PathParam("locale") String locale
 			) {
+		Integer customerId = AuthUtils.getUserId(securityContext);
 		Locale l = LocaleUtils.getLocale(locale);
-		return ResponseWrapper.wrap(() -> orderService.findByCustomer(getUserId(), l));
+		return ResponseWrapper.wrap(() -> orderService.findByCustomer(customerId, l));
 	}
 
 	@POST
