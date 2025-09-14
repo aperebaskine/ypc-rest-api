@@ -33,6 +33,7 @@ import jakarta.ws.rs.ApplicationPath;
 		tags = {
 				@Tag(name = "product", description = "Endpoints for requests handling logic related to products"),
 				@Tag(name = "customer", description = "Endpoints for requests handling logic related to customers"),
+				@Tag(name = "order", description = "Endpoints for requests handling logic related to orders. Allowed roles: admin, support"),
 				@Tag(name = "me", description = "Endpoints for customer-facing application. Allowed roles: customer"),
 				@Tag(name = "address", description = "Endpoints for requests handling logic related to addresses. Allowed roles: admin, hr"),
 				@Tag(name = "geo", description = "Endpoints for retrieving data about administrative units of supported countries"),
