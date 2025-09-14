@@ -37,7 +37,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/product")
+@Path("/products")
 @Tag(name = "product")
 public class ProductResource {
 
@@ -51,7 +51,7 @@ public class ProductResource {
 
 	@GET
 	@Public
-	@Path("/{locale}/{id}")
+	@Path("/{locale}/{productId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -72,8 +72,8 @@ public class ProductResource {
 							)
 			})
 	public Response findById(@PathParam("locale") String locale, 
-			@PathParam("id") @Min(1) Long id) {
-		return ResponseWrapper.wrap(() -> productService.findByIdLocalized(id, Locale.forLanguageTag(locale)));
+			@PathParam("productId") @Min(1) Long productId) {
+		return ResponseWrapper.wrap(() -> productService.findByIdLocalized(productId, Locale.forLanguageTag(locale)));
 	}
 
 	public Response create(@BeanParam ProductDTO dto) {

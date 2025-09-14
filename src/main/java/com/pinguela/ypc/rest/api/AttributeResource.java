@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Public
-@Path("/attribute")
+@Path("/attributes")
 @Tag(name = "product")
 public class AttributeResource {
 
@@ -38,7 +38,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/{locale}/{id:\\d+}")
+	@Path("/{locale}/{attributeId:\\d+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -66,18 +66,18 @@ public class AttributeResource {
 			})
 	public Response findById(
 			@PathParam("locale") String locale,
-			@PathParam("id") @Min(1) Integer id,
+			@PathParam("attributeId") @Min(1) Integer attributeId,
 			@QueryParam("categoryId") Short categoryId,
 			@QueryParam("unassignedValues") @DefaultValue("false") Boolean unassignedValues
 			) {
 		return ResponseWrapper.wrap(
-				() -> attributeService.findById(id, LocaleUtils.getLocale(locale), unassignedValues, categoryId), 
+				() -> attributeService.findById(attributeId, LocaleUtils.getLocale(locale), unassignedValues, categoryId), 
 				Status.NOT_FOUND
 				);
 	}
 
 	@GET
-	@Path("/{locale}/{name}")
+	@Path("/{locale}/{attributeName}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -105,13 +105,13 @@ public class AttributeResource {
 			})
 	public Response findByName(
 			@PathParam("locale") String locale,
-			@PathParam("name") String name,
+			@PathParam("attributeName") String attributeName,
 			@QueryParam("categoryId") Short categoryId,
 			@QueryParam("unassignedValues") @DefaultValue("false") Boolean unassignedValues
 			) {
 		Locale l = Locale.forLanguageTag(locale);
 		return ResponseWrapper.wrap(
-				() -> attributeService.findByName(name, l, unassignedValues, categoryId), 
+				() -> attributeService.findByName(attributeName, l, unassignedValues, categoryId), 
 				Status.NOT_FOUND
 				);
 	}
