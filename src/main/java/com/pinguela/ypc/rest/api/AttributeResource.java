@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.DefaultValue;
@@ -29,6 +30,12 @@ import jakarta.ws.rs.core.Response.Status;
 @Public
 @Path("/")
 @Tag(name = "product")
+@ApiResponses(
+		@ApiResponse(
+				responseCode = "400",
+				description = "One or more request parameters is malformed"
+				)
+		)
 public class AttributeResource {
 
 	private AttributeService attributeService;
@@ -45,23 +52,19 @@ public class AttributeResource {
 			operationId = "findAttributeById",
 			description = "Find data for an attribute by its ID.\n"
 					+ "Optionally return values that haven't been assigned to products,"
-					+ "or filter values that have been assigned to a specific category of products.",
+					+ "or filter values that have been assigned to a specific category and its sub-categories",
 					responses = {
 							@ApiResponse(
 									responseCode = "200", 
 									description = "Successfully retrieved attribute data",
 									content = @Content(
-											mediaType = "application/json",
+											mediaType = MediaType.APPLICATION_JSON,
 											schema = @Schema(implementation = AttributeDTOMixin.class)
 											)
-									), 
-							@ApiResponse(
-									responseCode = "400",
-									description = "Error in received parameters"
 									),
 							@ApiResponse(
 									responseCode = "404",
-									description = "No attribute found with the specified ID."
+									description = "No attribute matching the parameters was found"
 									)
 			})
 	public Response findById(
@@ -82,25 +85,21 @@ public class AttributeResource {
 	@Operation(
 			method = "GET",
 			operationId = "findAttributeByName",
-			description = "Find data for an attribute by its name or category.\n"
-					+ "Optionally return values that haven't been assigned to products, "
-					+ "*or* filter values assigned to products of a specific category.",
+			description = "Find data for an attribute by its name.\n"
+					+ "Optionally return values that haven't been assigned to products,"
+					+ "or filter values that have been assigned to a specific category and its sub-categories",
 					responses = {
 							@ApiResponse(
 									responseCode = "200", 
-									description = "Successfully retrieved attribute data",
+									description = "Successfully retrieved data",
 									content = @Content(
-											mediaType = "application/json",
+											mediaType = MediaType.APPLICATION_JSON,
 											schema = @Schema(implementation = AttributeDTOMixin.class)
 											)
-									), 
-							@ApiResponse(
-									responseCode = "400",
-									description = "Error in received parameters"
 									),
 							@ApiResponse(
 									responseCode = "404",
-									description = "No attribute found with the specified name and locale."
+									description = "No attribute matching the parameters was found"
 									)
 			})
 	public Response findByName(
@@ -122,23 +121,18 @@ public class AttributeResource {
 	@Operation(
 			method = "GET",
 			operationId = "findAttributeByCategory",
-			description = "Find data for an attribute by its name or category.\n"
-					+ "Optionally return values that haven't been assigned to products, "
-					+ "*or* filter values assigned to products of a specific category.",
+			description = "Find all attributes associated with a given category.\n"
+					+ "Optionally return values that haven't been assigned to products",
 					responses = {
 							@ApiResponse(
 									responseCode = "200", 
-									description = "Successfully retrieved attribute data",
+									description = "Successfully retrieved data",
 									content = @Content(
-											mediaType = "application/json",
+											mediaType = MediaType.APPLICATION_JSON,
 											array = @ArraySchema(
 													schema = @Schema(implementation = AttributeDTOMixin.class)
 													)
 											)
-									), 
-							@ApiResponse(
-									responseCode = "400",
-									description = "Error in received parameters"
 									)
 			})
 	public Response findByCategory(
