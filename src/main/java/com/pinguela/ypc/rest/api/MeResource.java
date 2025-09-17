@@ -216,12 +216,21 @@ public class MeResource {
 							)
 			})
 	public Response updatePassword(
-			@FormParam("password") String password
+			@FormParam("oldPassword") String oldPassword,
+			@FormParam("newPassword") String newPassword
 			) {
 		Integer customerId = AuthUtils.getUserId(securityContext);
 
 		try {
-			this.customerService.updatePassword(customerId, password);
+			// TODO: This probably should have a dedicated method in business logic
+			Customer c = this.customerService.findById(customerId);
+			c = this.customerService.login(c.getEmail(), oldPassword);
+			
+			if (c == null) {
+				throw new WebApplicationException(Status.BAD_REQUEST);
+			}
+			
+			this.customerService.updatePassword(customerId, newPassword);
 		} catch (YPCException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
