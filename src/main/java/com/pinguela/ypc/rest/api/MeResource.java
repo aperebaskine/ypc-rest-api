@@ -257,8 +257,6 @@ public class MeResource {
 					Address a = new Address();
 					a.setId(id);
 					a.setName(name);
-					a.setCreationDate(current.getCreationDate());
-					a.setCustomerId(customerId);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
 					a.setFloor(floor);
