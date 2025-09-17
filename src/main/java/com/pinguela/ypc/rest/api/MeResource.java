@@ -217,8 +217,8 @@ public class MeResource {
 							)
 			})
 	public Response updatePassword(
-			@FormParam("oldPassword") String oldPassword,
-			@FormParam("newPassword") String newPassword
+			@FormParam("oldPassword") @NotNull String oldPassword,
+			@FormParam("newPassword") @NotNull String newPassword
 			) {
 		Integer customerId = AuthUtils.getUserId(securityContext);
 
