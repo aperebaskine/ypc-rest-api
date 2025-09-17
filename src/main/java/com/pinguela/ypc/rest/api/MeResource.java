@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.pinguela.DataException;
+import com.pinguela.InvalidLoginCredentialsException;
 import com.pinguela.ServiceException;
 import com.pinguela.YPCException;
 import com.pinguela.yourpc.model.Address;
@@ -224,13 +225,12 @@ public class MeResource {
 		try {
 			// TODO: This probably should have a dedicated method in business logic
 			Customer c = this.customerService.findById(customerId);
-			c = this.customerService.login(c.getEmail(), oldPassword);
-			
-			if (c == null) {
-				throw new WebApplicationException(Status.BAD_REQUEST);
-			}
-			
+			this.customerService.login(c.getEmail(), oldPassword);
+
 			this.customerService.updatePassword(customerId, newPassword);
+		} catch (InvalidLoginCredentialsException e) {
+			logger.error(e);
+			throw new WebApplicationException(Status.BAD_REQUEST);
 		} catch (YPCException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -678,7 +678,7 @@ public class MeResource {
 			return ticketService.findById(ticketId, l);
 		});
 	}
-	
+
 	@GET
 	@Path("/rma/{locale}")
 	@Produces(MediaType.APPLICATION_JSON)
