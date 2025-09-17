@@ -173,8 +173,6 @@ public class AddressResource {
 	public Response update(
 			@PathParam("id") @NotNull Integer id,
 			@FormParam("name") String name,
-			@FormParam("customerId") Integer customerId,
-			@FormParam("employeeId") Integer employeeId,
 			@FormParam("streetName") @NotNull String streetName,
 			@FormParam("streetNumber") Short streetNumber,
 			@FormParam("floor") Short floor,
@@ -186,14 +184,9 @@ public class AddressResource {
 			) {
 		return ResponseWrapper.wrap(
 				() -> {
-					Address current = this.addressService.findById(id);
-
 					Address a = new Address();
 					a.setId(id);
 					a.setName(name);
-					a.setCreationDate(current.getCreationDate());
-					a.setCustomerId(customerId);
-					a.setEmployeeId(employeeId);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
 					a.setFloor(floor);
