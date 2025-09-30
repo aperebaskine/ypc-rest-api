@@ -45,7 +45,7 @@ public class AddressResource {
 	}
 
 	@GET
-	@Path("/address/{addressId}")
+	@Path("/addresses/{addressId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -78,7 +78,7 @@ public class AddressResource {
 	}
 
 	@POST
-	@Path("/address")
+	@Path("/addresses")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
@@ -145,7 +145,7 @@ public class AddressResource {
 	}
 
 	@PUT
-	@Path("/address/{addressId}")
+	@Path("/addresses/{addressId}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
@@ -210,7 +210,7 @@ public class AddressResource {
 
 
 	@DELETE
-	@Path("/address/{addressId}")
+	@Path("/addresses/{addressId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "DELETE",
