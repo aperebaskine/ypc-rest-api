@@ -1,7 +1,7 @@
 package com.pinguela.ypc.rest.api.exception;
 
 @SuppressWarnings("serial")
-public class InvalidTokenException extends Exception {
+public class InvalidTokenException extends ValidationException {
 
 	public InvalidTokenException() {
 		super();

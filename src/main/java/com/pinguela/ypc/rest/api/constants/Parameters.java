@@ -72,4 +72,7 @@ public final class Parameters {
 	public static final String IMAGE_TYPE = "image-type";
 	public static final String IMAGE_KEY = "image-key";
 	
+	public static final String CODE = "code";
+	public static final String STATE = "state";
+	
 }

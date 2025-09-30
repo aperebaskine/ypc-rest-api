@@ -1,33 +1,48 @@
 
 package com.pinguela.ypc.rest.api;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.pinguela.InvalidLoginCredentialsException;
 import com.pinguela.YPCException;
+import com.pinguela.yourpc.config.ConfigManager;
 import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
 import com.pinguela.ypc.rest.api.annotations.Public;
+import com.pinguela.ypc.rest.api.constants.Paths;
 import com.pinguela.ypc.rest.api.constants.Roles;
+import com.pinguela.ypc.rest.api.constants.SessionType;
+import com.pinguela.ypc.rest.api.cookies.SessionCookieConfig;
+import com.pinguela.ypc.rest.api.exception.ValidationException;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
+import com.pinguela.ypc.rest.api.login.OAuthManager;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
-import com.pinguela.ypc.rest.api.model.ErrorLog;
+import com.pinguela.ypc.rest.api.model.OAuthRedirectData;
+import com.pinguela.ypc.rest.api.model.Session;
+import com.pinguela.ypc.rest.api.util.CookieUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
-import com.pinguela.ypc.rest.api.util.TokenManager;
 import com.pinguela.ypc.rest.api.validation.Validators;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HEAD;
@@ -35,18 +50,29 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/customer")
+@Path("/")
 @Tag(name = "customer")
+@ApiResponses(
+		@ApiResponse(
+				responseCode = "400",
+				description = "One or more of the request parameters is malformed"
+				)
+		)
 public class CustomerResource {
 
 	private static Logger logger = LogManager.getLogger(CustomerResource.class);
 
-	private TokenManager tokenManager = TokenManager.getInstance();
+	private OAuthManager oauthManager = OAuthManager.getInstance();
 	private CustomerService customerService;
 
 	public CustomerResource() {
@@ -55,13 +81,13 @@ public class CustomerResource {
 
 	@POST
 	@Public
-	@Path("/login")
+	@Path("customer/login")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
 			method = "POST",
 			operationId = "loginCustomer",
-			description = "Authenticates the customer, returning a JWT containing 'name', 'fullName' and 'role' claims", 
+			description = "Authenticates the customer, returning a short-lived JWT to be used as Bearer authorization header token.", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
@@ -75,23 +101,20 @@ public class CustomerResource {
 									)
 							),
 					@ApiResponse(
-							responseCode = "400",
-							description = "Malformed request"
-							),
-					@ApiResponse(
 							responseCode = "404",
 							description = "Customer not found"
 							)
 			})
 	public Response login(
-			@FormParam("email") @Email @NotNull String email,
-			@FormParam("password") @NotNull String password
+			@FormParam("email") @Email String email,
+			@FormParam("password") String password,
+			@Context ContainerRequestContext context
 			) {
 
-		Customer c;
+		Customer customer;
 
 		try {
-			c = customerService.login(email, password);
+			customer = customerService.login(email, password);
 
 		} catch (InvalidLoginCredentialsException e) {
 			return Response.status(Status.NOT_FOUND).build();
@@ -99,18 +122,18 @@ public class CustomerResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
-		return ResponseWrapper.wrap(() -> tokenManager.encodeToken(c));
+		return buildNewLoginResponse(context, customer);
 	}
 
 	@POST
 	@Public
-	@Path("/register")
+	@Path("customer/register")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
 			method = "POST",
 			operationId = "registerCustomer",
-			description = "Creates a customer account, returning a JWT containing 'name', 'fullName' and 'role' claims", 
+			description = "Creates a customer account, returning a short-lived JWT to be used as Bearer authorization header token.", 
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
@@ -118,25 +141,18 @@ public class CustomerResource {
 							content = @Content(
 									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT
 									)
-							),
-					@ApiResponse(
-							responseCode = "400",
-							description = "Malformed request",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = ErrorLog.class)
-									)
 							)
 			})
 	public Response register(
-			@FormParam("firstName") @NotNull String firstName,
-			@FormParam("lastName1") @NotNull String lastName1,
+			@FormParam("firstName") String firstName,
+			@FormParam("lastName1") String lastName1,
 			@FormParam("lastName2") String lastName2,
-			@FormParam("docType") @NotNull String documentTypeId,
-			@FormParam("docNumber") @NotNull String documentNumber,
-			@FormParam("phoneNumber") @NotNull String phoneNumber,
+			@FormParam("docType") String documentTypeId,
+			@FormParam("docNumber") String documentNumber,
+			@FormParam("phoneNumber") String phoneNumber,
 			@FormParam("email") @NotNull String email,
-			@FormParam("password") @NotNull String password
+			@FormParam("password") @NotNull String password,
+			@Context ContainerRequestContext context
 			) {
 		return new ParameterProcessor()
 				.validate("email", email, Validators.isUnusedEmail())
@@ -158,8 +174,164 @@ public class CustomerResource {
 						throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 					}
 
-					return tokenManager.encodeToken(createdCustomer);
+					return buildNewLoginResponse(context, createdCustomer);
 				});
+	}
+
+	private Response buildNewLoginResponse(ContainerRequestContext context, Customer customer) {
+		Session session = new Session(customer, SessionType.CREDENTIALS);
+
+		String bearerToken = session.encode(Duration.ofMinutes(10));
+
+		SessionCookieConfig config = SessionCookieConfig.getInstance();
+		Duration cookieDuration = Duration.ofSeconds(config.getMaxAge());
+		NewCookie sessionCookie = CookieUtils.newCookie(context, config, session.encode(cookieDuration));
+
+		return Response.ok(bearerToken)
+				.cookie(sessionCookie)
+				.build();
+	}
+
+	@GET
+	@Public
+	@Path(Paths.SESSION)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	@Operation(
+			method = "GET",
+			operationId = "refreshCustomerSession",
+			description = "Refreshes the customer session, returning a short-lived JWT to be used as Bearer authorization header token.", 
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully refreshed session",
+							content = @Content(
+									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT,
+									schema = @Schema(
+											type = "string",
+											format = "byte"
+											)
+									)
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
+							)
+			})
+	public Response refreshSession(
+			@Context ContainerRequestContext requestContext
+			) {
+		Map<String, Cookie> cookies = requestContext.getCookies();
+		Cookie sessionCookie = cookies.get(SessionCookieConfig.getInstance().getName());
+
+		if (sessionCookie == null) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+
+		Session session;
+
+		try {
+			session = Session.decode(sessionCookie.getValue());
+
+			String newSession;
+
+			switch (session.getType()) {
+			case CREDENTIALS:
+				newSession = session.encode(Duration.ofMinutes(10));
+				break;
+			case OAUTH:
+				newSession = oauthManager.getSession(cookies);
+				break;
+			default:
+				throw new IllegalStateException();
+			}
+
+			return Response.ok(newSession)
+					.build();
+		} catch (ValidationException e) {
+			logger.warn(e);
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+	}
+
+	@GET
+	@Public
+	@Path(Paths.OAUTH)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	@Operation(
+			method = "POST",
+			operationId = "loginCustomer",
+			description = "Authenticates the customer, returning a JWT containing 'name', 'fullName' and 'role' claims", 
+			responses = {
+					@ApiResponse(
+							responseCode = "302", 
+							description = "Redirecting to OAuth provider consent screen"
+							),
+					@ApiResponse(
+							responseCode = "404",
+							description = "Customer not found"
+							)
+			})
+	public Response oauthAuthorize(
+			@QueryParam("provider") 
+			@DefaultValue("google") 
+			@Parameter(
+					description = "Reserved for future use",
+					hidden = true
+					)
+			String provider,
+			@QueryParam("redirectTo") @NotNull @DefaultValue("/") String redirectTo,
+			@Context ContainerRequestContext requestContext
+			) throws URISyntaxException {
+
+		if (!isValidRedirectUri(redirectTo)) {
+			throw new WebApplicationException(Status.BAD_REQUEST);
+		}
+
+		OAuthRedirectData redirectInfo = oauthManager.initAuthFlow("google", redirectTo, requestContext);
+		URI redirectUri = URI.create(redirectInfo.getRedirectUrl());
+
+		return Response
+				.status(Status.FOUND)
+				.location(redirectUri)
+				.cookie((NewCookie[]) redirectInfo.getCookies().toArray(new NewCookie[0]))
+				.build();
+	}
+
+	@GET
+	@Public
+	@Path(Paths.OAUTH_CALLBACK)
+	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	public Response oauthCallback(
+			@Context ContainerRequestContext context
+			) {
+
+		OAuthRedirectData redirectInfo;
+
+		try {
+			redirectInfo = oauthManager.handleCallback(context);
+		} catch (ValidationException e) {
+			logger.warn(e);
+			throw new WebApplicationException(Status.UNAUTHORIZED);
+		}
+
+		URI redirectUri = URI.create(redirectInfo.getRedirectUrl());
+
+		return Response
+				.status(Status.FOUND)
+				.location(redirectUri)
+				.cookie(redirectInfo.getCookies().toArray(new NewCookie[0]))
+				.build();
+	}
+
+	private boolean isValidRedirectUri(String redirectUri) {
+		if (ConfigManager.isDebug()) { // Allows localhost absolute URLs
+			return true;
+		}
+
+		URI uri = URI.create(redirectUri);
+		return !uri.isAbsolute(); // Disallow redirects to other domains
 	}
 
 	@GET
@@ -181,10 +353,6 @@ public class CustomerResource {
 									)
 							),
 					@ApiResponse(
-							responseCode = "400",
-							description = "Malformed request"
-							),
-					@ApiResponse(
 							responseCode = "401",
 							description = "Caller is unauthenticated"
 							),
@@ -201,7 +369,7 @@ public class CustomerResource {
 
 	@HEAD
 	@Public
-	@Path("/{customerEmail}")
+	@Path("customer/{customerEmail}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "HEAD",
@@ -213,16 +381,12 @@ public class CustomerResource {
 							description = "Email already exists"
 							),
 					@ApiResponse(
-							responseCode = "400",
-							description = "Email parameter is malformed"
-							),
-					@ApiResponse(
 							responseCode = "404",
 							description = "Email doesn't exist"
 							)
 			})
 	public Response exists(
-			@PathParam("email") @Email @NotNull String email
+			@PathParam("customerEmail") @Email @NotNull String email
 			) {
 		boolean exists;
 
@@ -237,7 +401,7 @@ public class CustomerResource {
 	}
 
 	@GET
-	@Path("/{customerEmail}")
+	@Path("customer/{customerEmail}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
 	@Operation(
@@ -253,10 +417,6 @@ public class CustomerResource {
 									mediaType = "application/json",
 									schema = @Schema(implementation = Customer.class)
 									)
-							),
-					@ApiResponse(
-							responseCode = "400",
-							description = "Email parameter is malformed"
 							),
 					@ApiResponse(
 							responseCode = "401",
