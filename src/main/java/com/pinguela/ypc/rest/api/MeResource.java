@@ -66,6 +66,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -348,7 +349,7 @@ public class MeResource {
 							)
 			})
 	public Response updateAddress(
-			@PathParam("id") @NotNull Integer id,
+			@PathParam("addressId") @NotNull Integer addressId,
 			@FormParam("name") @NotNull String name,
 			@FormParam("streetName") @NotNull String streetName,
 			@FormParam("streetNumber") Short streetNumber,
@@ -369,7 +370,7 @@ public class MeResource {
 					}
 
 					Address a = new Address();
-					a.setId(id);
+					a.setId(addressId);
 					a.setName(name);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
@@ -382,12 +383,48 @@ public class MeResource {
 
 					Integer newId = this.addressService.update(a);
 
-					if (id == null) {
+					if (addressId == null) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
 
 					a.setId(newId);
 					return a;
+				});
+	}
+	
+	@DELETE
+	@Path("/addresses/{addressId}")
+	@Operation(
+			method = "DELETE",
+			operationId = "deleteMyAddress",
+			description = "Delete an address for the authenticated customer",
+			responses = {
+					@ApiResponse(
+							responseCode = "200", 
+							description = "Successfully updated address. If it was associated with an order, the ID is updated",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = AddressDTOMixin.class)
+									)
+							),
+					@ApiResponse(
+							responseCode = "400",
+							description = "Malformed parameter(s)"
+							)
+			})
+	public Response deleteAddress(
+			@PathParam("addressId") @NotNull Integer addressId
+			) {
+		return ResponseWrapper.wrap(
+				() -> {
+					Integer customerId = AuthUtils.getUserId(securityContext);
+					Address address = this.addressService.findById(customerId);
+
+					if (address.getCustomerId().equals(customerId)) {
+						throw new WebApplicationException(Status.FORBIDDEN);
+					}
+
+					return this.addressService.delete(addressId);
 				}
 				);
 	}
