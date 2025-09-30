@@ -59,7 +59,7 @@ public class SessionResource {
 							),
 					@ApiResponse(
 							responseCode = "401",
-							description = "Caller is unauthenticated"
+							description = "No session established for user to refresh"
 							)
 			})
 	public Response refreshSession(
