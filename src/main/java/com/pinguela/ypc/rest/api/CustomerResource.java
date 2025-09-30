@@ -198,7 +198,7 @@ public class CustomerResource {
 	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
 			method = "POST",
-			operationId = "loginCustomer",
+			operationId = "loginCustomerWithOAuth",
 			description = "Authenticates the customer, returning a JWT containing 'name', 'fullName' and 'role' claims", 
 			responses = {
 					@ApiResponse(
