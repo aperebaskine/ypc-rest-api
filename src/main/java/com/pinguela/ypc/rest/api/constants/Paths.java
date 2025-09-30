@@ -7,6 +7,6 @@ public final class Paths {
 	public static final String OAUTH = "customer/oauth";
 	public static final String OAUTH_CALLBACK = "customer/oauth/callback";
 	
-	public static final String SESSION = "customer/session";
+	public static final String SESSION = "session";
 
 }

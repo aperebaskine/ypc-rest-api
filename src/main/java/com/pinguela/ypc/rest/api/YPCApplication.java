@@ -31,6 +31,7 @@ import jakarta.ws.rs.ApplicationPath;
 						)
 		},
 		tags = {
+				@Tag(name = "session", description = "Endpoints related to managing the authenticated user's session"),
 				@Tag(name = "product", description = "Endpoints for requests handling logic related to products"),
 				@Tag(name = "customer", description = "Endpoints for requests handling logic related to customers"),
 				@Tag(name = "order", description = "Endpoints for requests handling logic related to orders. Allowed roles: admin, support"),
