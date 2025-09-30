@@ -191,7 +191,7 @@ public class CustomerResource {
 				.build();
 	}
 
-	@GET
+	@POST
 	@Public
 	@Path(Paths.OAUTH)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
