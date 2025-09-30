@@ -29,6 +29,7 @@ import com.pinguela.ypc.rest.api.util.CookieUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.validation.Validators;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -237,6 +238,7 @@ public class CustomerResource {
 
 	@GET
 	@Public
+	@Hidden
 	@Path(Paths.OAUTH_CALLBACK)
 	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	public Response oauthCallback(
