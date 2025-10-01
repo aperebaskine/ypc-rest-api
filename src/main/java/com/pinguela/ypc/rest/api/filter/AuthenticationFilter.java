@@ -15,6 +15,7 @@ import com.pinguela.ypc.rest.api.model.Session;
 import com.pinguela.ypc.rest.api.model.UserPrincipal;
 
 import jakarta.annotation.Priority;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -40,6 +41,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 
+		if (HttpMethod.OPTIONS.equals(requestContext.getMethod())) { // Allow CORS pre-flight requests
+			return;
+		}
+		
 		if (isPublicEndpoint(requestContext)) {
 			return;
 		}
