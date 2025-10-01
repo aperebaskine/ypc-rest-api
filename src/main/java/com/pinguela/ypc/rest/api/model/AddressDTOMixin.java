@@ -52,21 +52,24 @@ public abstract class AddressDTOMixin {
 	@Schema(nullable = false, requiredMode = RequiredMode.REQUIRED)
 	private Integer cityId;
 
-	@JsonIgnore
+	@JsonProperty
+	@Schema(nullable = false, accessMode = AccessMode.READ_ONLY)
 	private String city;
 
-	@JsonIgnore
+	@JsonProperty
 	@Schema(nullable = false, accessMode = AccessMode.READ_ONLY)
 	private Integer provinceId;
 
-	@JsonIgnore
+	@JsonProperty
+	@Schema(nullable = false, accessMode = AccessMode.READ_ONLY)
 	private String province;
 
-	@JsonIgnore
+	@JsonProperty
 	@Schema(nullable = false, accessMode = AccessMode.READ_ONLY)
 	private String countryId;
 
-	@JsonIgnore
+	@JsonProperty
+	@Schema(nullable = false, accessMode = AccessMode.READ_ONLY)
 	private String country;
 
 	@JsonProperty("isDefault")

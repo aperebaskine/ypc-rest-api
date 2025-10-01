@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pinguela.yourpc.model.Address;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AccessMode;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 @Schema(name = "Customer")
@@ -36,7 +37,8 @@ public class CustomerDTOMixin {
 	@Schema(nullable = true)
 	private String lastName2;
 	
-	@JsonIgnore
+	@JsonProperty
+	@Schema(nullable = false, accessMode = AccessMode.READ_ONLY)
 	private String getFullName() { return null; }
 	
 	@JsonProperty
