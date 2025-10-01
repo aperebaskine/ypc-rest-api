@@ -195,19 +195,15 @@ public class CustomerResource {
 	@Public
 	@Path(Paths.OAUTH)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	@Produces(MediaType.TEXT_PLAIN)
 	@Operation(
 			method = "POST",
 			operationId = "loginCustomerWithOAuth",
-			description = "Authenticates the customer, returning a JWT containing 'name', 'fullName' and 'role' claims", 
+			description = "Initializes the OAuth code flow, returning the consent screen URL that the user should be redirected to.", 
 			responses = {
 					@ApiResponse(
-							responseCode = "302", 
-							description = "Redirecting to OAuth provider consent screen"
-							),
-					@ApiResponse(
-							responseCode = "404",
-							description = "Customer not found"
+							responseCode = "200", 
+							description = "Successfully initialized code flow, returned consent screen URL"
 							)
 			})
 	public Response oauthAuthorize(
@@ -226,13 +222,11 @@ public class CustomerResource {
 			throw new WebApplicationException(Status.BAD_REQUEST);
 		}
 
-		OAuthResponseData redirectInfo = oauthManager.initAuthFlow("google", redirectTo, requestContext);
-		URI redirectUri = URI.create(redirectInfo.getUrl());
+		OAuthResponseData responseData = oauthManager.initAuthFlow("google", redirectTo, requestContext);
 
 		return Response
-				.status(Status.FOUND)
-				.location(redirectUri)
-				.cookie((NewCookie[]) redirectInfo.getCookies().toArray(new NewCookie[0]))
+				.ok(responseData.getUrl())
+				.cookie((NewCookie[]) responseData.getCookies().toArray(new NewCookie[0]))
 				.build();
 	}
 
@@ -245,21 +239,21 @@ public class CustomerResource {
 			@Context ContainerRequestContext context
 			) {
 
-		OAuthResponseData redirectInfo;
+		OAuthResponseData responseData;
 
 		try {
-			redirectInfo = oauthManager.handleCallback(context);
+			responseData = oauthManager.handleCallback(context);
 		} catch (ValidationException e) {
 			logger.warn(e);
 			throw new WebApplicationException(Status.UNAUTHORIZED);
 		}
 
-		URI redirectUri = URI.create(redirectInfo.getUrl());
+		URI redirectUri = URI.create(responseData.getUrl());
 
 		return Response
 				.status(Status.FOUND)
 				.location(redirectUri)
-				.cookie(redirectInfo.getCookies().toArray(new NewCookie[0]))
+				.cookie(responseData.getCookies().toArray(new NewCookie[0]))
 				.build();
 	}
 
