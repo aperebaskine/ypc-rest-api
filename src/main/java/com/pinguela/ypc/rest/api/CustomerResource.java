@@ -82,7 +82,7 @@ public class CustomerResource {
 	@Public
 	@Path("customers/login")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	@Produces(MediaType.TEXT_PLAIN)
 	@Operation(
 			method = "POST",
 			operationId = "loginCustomer",
@@ -92,7 +92,7 @@ public class CustomerResource {
 							responseCode = "200", 
 							description = "Successfully logged in",
 							content = @Content(
-									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT,
+									mediaType = MediaType.TEXT_PLAIN,
 									schema = @Schema(
 											type = "string",
 											format = "byte"
@@ -128,7 +128,7 @@ public class CustomerResource {
 	@Public
 	@Path("customers/register")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	@Produces(MediaType.TEXT_PLAIN)
 	@Operation(
 			method = "POST",
 			operationId = "registerCustomer",
@@ -138,7 +138,11 @@ public class CustomerResource {
 							responseCode = "200", 
 							description = "Successfully registered",
 							content = @Content(
-									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT
+									mediaType = MediaType.TEXT_PLAIN,
+									schema = @Schema(
+											type = "string",
+											format = "byte"
+											)
 									)
 							)
 			})
@@ -234,7 +238,6 @@ public class CustomerResource {
 	@Public
 	@Hidden
 	@Path(Paths.OAUTH_CALLBACK)
-	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	public Response oauthCallback(
 			@Context ContainerRequestContext context
 			) {

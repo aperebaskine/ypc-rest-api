@@ -40,7 +40,7 @@ public class SessionResource {
 	@Public
 	@Path(Paths.SESSION)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
+	@Produces(MediaType.TEXT_PLAIN)
 	@Operation(
 			method = "GET",
 			operationId = "refreshSession",
@@ -50,7 +50,7 @@ public class SessionResource {
 							responseCode = "200", 
 							description = "Successfully refreshed session",
 							content = @Content(
-									mediaType = com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT,
+									mediaType = MediaType.TEXT_PLAIN,
 									schema = @Schema(
 											type = "string",
 											format = "byte"
