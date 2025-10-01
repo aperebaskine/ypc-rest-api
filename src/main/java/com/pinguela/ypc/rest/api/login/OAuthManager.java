@@ -44,7 +44,7 @@ import com.pinguela.ypc.rest.api.exception.InvalidTokenException;
 import com.pinguela.ypc.rest.api.exception.ResourceException;
 import com.pinguela.ypc.rest.api.exception.ValidationException;
 import com.pinguela.ypc.rest.api.internal.AlgorithmFactory;
-import com.pinguela.ypc.rest.api.model.OAuthRedirectData;
+import com.pinguela.ypc.rest.api.model.OAuthResponseData;
 import com.pinguela.ypc.rest.api.model.Session;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -119,7 +119,7 @@ public class OAuthManager {
 	 * @param requestContext The current request
 	 * @return An object containing the redirect URL to the consent screen and the cookies to set in the response
 	 */
-	public OAuthRedirectData initAuthFlow(String provider, String redirectTo, ContainerRequestContext requestContext) {
+	public OAuthResponseData initAuthFlow(String provider, String redirectTo, ContainerRequestContext requestContext) {
 		OAuth20Service oauthService = getOrBuildOAuthService(requestContext);
 		UriInfo uriInfo = requestContext.getUriInfo();
 
@@ -145,12 +145,12 @@ public class OAuthManager {
 				.pkce(pkce)
 				.build();
 
-		OAuthRedirectData redirectData = new OAuthRedirectData(baseUri)
+		OAuthResponseData redirectData = new OAuthResponseData(baseUri)
 				.withCookie(OAuthFlowCookie.PROVIDER, provider)
 				.withCookie(OAuthFlowCookie.REDIRECT_TO, finalRedirect.toString())
 				.withCookie(OAuthFlowCookie.CODE_VERIFIER, pkce.getCodeVerifier())
 				.withCookie(OAuthFlowCookie.NONCE, nonce)
-				.withRedirectUrl(authUrl);
+				.withUrl(authUrl);
 
 		return redirectData;
 	}
@@ -161,7 +161,7 @@ public class OAuthManager {
 	 * @return An object containing the redirect URL to the consent screen and the cookies to set in the response
 	 * @throws ValidationException if any of the required cookies or parameters is missing or invalid
 	 */
-	public OAuthRedirectData handleCallback(ContainerRequestContext requestContext) throws ValidationException {
+	public OAuthResponseData handleCallback(ContainerRequestContext requestContext) throws ValidationException {
 		UriInfo uriInfo = requestContext.getUriInfo();
 		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 		Map<String, Cookie> cookies = requestContext.getCookies();
@@ -183,10 +183,10 @@ public class OAuthManager {
 
 		String redirectTo = requiredCookie(cookies, OAuthFlowCookie.REDIRECT_TO.getName());
 
-		return new OAuthRedirectData(uriInfo.getBaseUri())
+		return new OAuthResponseData(uriInfo.getBaseUri())
 				.withCookie(SessionCookieConfig.getInstance(), session.encode(Duration.ofDays(14)))
 				.withExpiredAuthFlowCookies()
-				.withRedirectUrl(redirectTo);
+				.withUrl(redirectTo);
 	}
 
 	private void validateState(MultivaluedMap<String, String> queryParams, Map<String, Cookie> cookies) throws ValidationException {

@@ -23,7 +23,7 @@ import com.pinguela.ypc.rest.api.exception.ValidationException;
 import com.pinguela.ypc.rest.api.json.param.ParameterProcessor;
 import com.pinguela.ypc.rest.api.login.OAuthManager;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
-import com.pinguela.ypc.rest.api.model.OAuthRedirectData;
+import com.pinguela.ypc.rest.api.model.OAuthResponseData;
 import com.pinguela.ypc.rest.api.model.Session;
 import com.pinguela.ypc.rest.api.util.CookieUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
@@ -226,7 +226,7 @@ public class CustomerResource {
 			throw new WebApplicationException(Status.BAD_REQUEST);
 		}
 
-		OAuthRedirectData redirectInfo = oauthManager.initAuthFlow("google", redirectTo, requestContext);
+		OAuthResponseData redirectInfo = oauthManager.initAuthFlow("google", redirectTo, requestContext);
 		URI redirectUri = URI.create(redirectInfo.getRedirectUrl());
 
 		return Response
@@ -245,7 +245,7 @@ public class CustomerResource {
 			@Context ContainerRequestContext context
 			) {
 
-		OAuthRedirectData redirectInfo;
+		OAuthResponseData redirectInfo;
 
 		try {
 			redirectInfo = oauthManager.handleCallback(context);

@@ -12,26 +12,26 @@ import com.pinguela.ypc.rest.api.util.PathUtils;
 
 import jakarta.ws.rs.core.NewCookie;
 
-public class OAuthRedirectData {
+public class OAuthResponseData {
 
-	private String redirectUrl;
+	private String nextUrl;
 	private List<NewCookie> cookies;
 
 	private URI baseUri;
 	private Instant now;
 
-	public OAuthRedirectData(URI baseUri) {
+	public OAuthResponseData(URI baseUri) {
 		this.cookies = new ArrayList<NewCookie>();
 		this.baseUri = baseUri;
 		this.now = Instant.now();
 	}
 
 	public String getRedirectUrl() {
-		return redirectUrl;
+		return nextUrl;
 	}
 
-	public OAuthRedirectData withRedirectUrl(String redirectUrl) {
-		this.redirectUrl = redirectUrl;
+	public OAuthResponseData withUrl(String nextUrl) {
+		this.nextUrl = nextUrl;
 		return this;
 	}
 
@@ -39,7 +39,7 @@ public class OAuthRedirectData {
 		return cookies;
 	}
 
-	public OAuthRedirectData withCookie(CookieConfiguration config, String value) {
+	public OAuthResponseData withCookie(CookieConfiguration config, String value) {
 		addCookie(config, value, false);
 		return this;
 	}
@@ -47,9 +47,9 @@ public class OAuthRedirectData {
 	/**
 	 * Add expired cookies for all cookies declared in {@link OAuthFlowCookie}.
 	 */
-	public OAuthRedirectData withExpiredAuthFlowCookies() {
+	public OAuthResponseData withExpiredAuthFlowCookies() {
 		for (OAuthFlowCookie cookie: OAuthFlowCookie.values()) {
-			addCookie(cookie, redirectUrl, true);
+			addCookie(cookie, nextUrl, true);
 		}
 		return this;
 	}
