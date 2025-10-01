@@ -433,7 +433,7 @@ public class MeResource {
 	@Path("/orders/{locale}/{orderId}")
 	@Operation(
 			method = "GET",
-			operationId = "getMyOrders",
+			operationId = "getMyOrder",
 			description = "Retrieve the authenticated customer's orders",
 			responses = {
 					@ApiResponse(
