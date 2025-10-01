@@ -21,7 +21,7 @@ public class CORSFilter implements ContainerResponseFilter {
 		MultivaluedMap<String, Object> headers = responseContext.getHeaders();
 		
 		// TODO: Dynamically resolve allowed origins
-		headers.add("Access-Control-Allow-Origin", "http://localhost:8080");
+		headers.add("Access-Control-Allow-Origin", "http://localhost:4200");
         headers.add("Access-Control-Allow-Headers",
                 "CSRF-Token, X-Requested-By, Authorization, Content-Type");
         headers.add("Access-Control-Allow-Credentials", "true");
