@@ -227,7 +227,7 @@ public class CustomerResource {
 		}
 
 		OAuthResponseData redirectInfo = oauthManager.initAuthFlow("google", redirectTo, requestContext);
-		URI redirectUri = URI.create(redirectInfo.getRedirectUrl());
+		URI redirectUri = URI.create(redirectInfo.getUrl());
 
 		return Response
 				.status(Status.FOUND)
@@ -254,7 +254,7 @@ public class CustomerResource {
 			throw new WebApplicationException(Status.UNAUTHORIZED);
 		}
 
-		URI redirectUri = URI.create(redirectInfo.getRedirectUrl());
+		URI redirectUri = URI.create(redirectInfo.getUrl());
 
 		return Response
 				.status(Status.FOUND)

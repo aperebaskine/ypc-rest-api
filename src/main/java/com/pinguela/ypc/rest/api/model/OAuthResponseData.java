@@ -26,7 +26,7 @@ public class OAuthResponseData {
 		this.now = Instant.now();
 	}
 
-	public String getRedirectUrl() {
+	public String getUrl() {
 		return nextUrl;
 	}
 
