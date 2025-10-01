@@ -80,7 +80,7 @@ public class CustomerResource {
 
 	@POST
 	@Public
-	@Path("customer/login")
+	@Path("customers/login")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
@@ -126,7 +126,7 @@ public class CustomerResource {
 
 	@POST
 	@Public
-	@Path("customer/register")
+	@Path("customers/register")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(com.pinguela.ypc.rest.api.constants.MediaType.APPLICATION_JWT)
 	@Operation(
@@ -267,7 +267,7 @@ public class CustomerResource {
 	}
 
 	@GET
-	@Path("/{customerId:^\\d+$}")
+	@Path("customers/{customerId:^\\d+$}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
 	@Operation(
@@ -301,7 +301,7 @@ public class CustomerResource {
 
 	@HEAD
 	@Public
-	@Path("customer/{customerEmail}")
+	@Path("customers/{customerEmail}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "HEAD",
@@ -333,7 +333,7 @@ public class CustomerResource {
 	}
 
 	@GET
-	@Path("customer/{customerEmail}")
+	@Path("customers/{customerEmail}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
 	@Operation(

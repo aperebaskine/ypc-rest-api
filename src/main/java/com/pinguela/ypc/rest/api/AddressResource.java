@@ -237,7 +237,7 @@ public class AddressResource {
 	}
 
 	@GET
-	@Path("/customer/{customerId}/addresses")
+	@Path("/customers/{customerId}/addresses")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -276,7 +276,7 @@ public class AddressResource {
 	}
 
 	@DELETE
-	@Path("/customer/{customerId}/addresses")
+	@Path("/customers/{customerId}/addresses")
 	@Operation(
 			method = "DELETE",
 			operationId = "deleteAddressesByCustomer",

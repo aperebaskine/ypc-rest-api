@@ -4,8 +4,8 @@ public final class Paths {
 	
 	private Paths() {}
 	
-	public static final String OAUTH = "customer/oauth";
-	public static final String OAUTH_CALLBACK = "customer/oauth/callback";
+	public static final String OAUTH = "customers/oauth";
+	public static final String OAUTH_CALLBACK = "customers/oauth/callback";
 	
 	public static final String SESSION = "session";
 
