@@ -318,12 +318,12 @@ public class CustomerResource {
 							)
 			})
 	public Response exists(
-			@PathParam("customerEmail") @Email @NotNull String email
+			@PathParam("customerEmail") @Email @NotNull String customerEmail
 			) {
 		boolean exists;
 
 		try {
-			exists = customerService.emailExists(email);
+			exists = customerService.emailExists(customerEmail);
 		} catch (YPCException e) {
 			logger.error(e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -360,9 +360,9 @@ public class CustomerResource {
 							)
 			})
 	public Response findByEmail(
-			@PathParam("email") @Email @NotNull String email
+			@PathParam("customerEmail") @Email @NotNull String customerEmail
 			) {
-		return ResponseWrapper.wrap(() -> customerService.findByEmail(email), Status.NOT_FOUND);	
+		return ResponseWrapper.wrap(() -> customerService.findByEmail(customerEmail), Status.NOT_FOUND);	
 	}
 
 }

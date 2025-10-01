@@ -171,7 +171,7 @@ public class AddressResource {
 							)
 			})
 	public Response update(
-			@PathParam("id") @NotNull Integer id,
+			@PathParam("addressId") @NotNull Integer addressId,
 			@FormParam("name") String name,
 			@FormParam("streetName") @NotNull String streetName,
 			@FormParam("streetNumber") Short streetNumber,
@@ -185,7 +185,7 @@ public class AddressResource {
 		return ResponseWrapper.wrap(
 				() -> {
 					Address a = new Address();
-					a.setId(id);
+					a.setId(addressId);
 					a.setName(name);
 					a.setStreetName(streetName);
 					a.setStreetNumber(streetNumber);
@@ -198,7 +198,7 @@ public class AddressResource {
 
 					Integer newId = this.addressService.update(a);
 
-					if (id == null) {
+					if (addressId == null) {
 						throw new WebApplicationException(Status.BAD_REQUEST);
 					}
 
@@ -231,9 +231,9 @@ public class AddressResource {
 							)
 			})
 	public Response delete(
-			@PathParam("id") Integer id
+			@PathParam("addressId") Integer addressId
 			) {
-		return ResponseWrapper.wrap(() -> this.addressService.delete(id));
+		return ResponseWrapper.wrap(() -> this.addressService.delete(addressId));
 	}
 
 	@GET
