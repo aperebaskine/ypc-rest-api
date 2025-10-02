@@ -332,7 +332,7 @@ public class CustomerResource {
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 		}
 
-		return Response.status(exists ? Status.OK : Status.NOT_FOUND).build();			
+		return Response.status(exists ? Status.NO_CONTENT : Status.NOT_FOUND).build();			
 	}
 
 	@GET
