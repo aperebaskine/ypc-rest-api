@@ -270,7 +270,7 @@ public class CustomerResource {
 	}
 
 	@GET
-	@Path("customers/{customerId:^\\d+$}")
+	@Path("customers/{customerId: \\d+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
 	@Operation(
@@ -304,7 +304,7 @@ public class CustomerResource {
 
 	@HEAD
 	@Public
-	@Path("customers/{customerEmail}")
+	@Path("customers/{customerEmail: .+%40.+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "HEAD",
@@ -336,7 +336,7 @@ public class CustomerResource {
 	}
 
 	@GET
-	@Path("customers/{customerEmail}")
+	@Path("customers/{customerEmail: .+%40.+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({Roles.ADMIN, Roles.HR, Roles.SUPPORT})
 	@Operation(
