@@ -19,5 +19,17 @@ public class CookieUtils {
 				.sameSite(config.getSameSite())
 				.build();
 	}
+	
+	public static NewCookie expiredCookie(ContainerRequestContext context, CookieConfiguration config) {
+		String path = PathUtils.createPath(context, config.getPath());
+		return new NewCookie.Builder(config.getName())
+				.domain(config.getDomain())
+				.path(path)
+				.maxAge(0)
+				.httpOnly(config.isHttpOnly())
+				.secure(config.isSecure())
+				.sameSite(config.getSameSite())
+				.build();
+	}
 
 }
