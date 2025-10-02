@@ -50,7 +50,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
@@ -217,14 +216,14 @@ public class CustomerResource {
 							)
 			})
 	public Response oauthAuthorize(
-			@QueryParam("provider") 
+			@FormParam("provider") 
 			@DefaultValue("google") 
 			@Parameter(
 					description = "Reserved for future use",
 					hidden = true
 					)
 			String provider,
-			@QueryParam("redirectTo") @NotNull @DefaultValue("/") String redirectTo,
+			@FormParam("redirectTo") @NotNull @DefaultValue("/") String redirectTo,
 			@Context ContainerRequestContext requestContext
 			) throws URISyntaxException {
 
