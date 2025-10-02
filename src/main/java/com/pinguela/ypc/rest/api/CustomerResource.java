@@ -122,13 +122,14 @@ public class CustomerResource {
 
 		return buildNewLoginResponse(context, customer);
 	}
-	
+
 	@POST
 	@Path("customers/logout")
 	@Operation(
 			method = "POST",
 			operationId = "logoutCustomer",
-			description = "Removes the user's session cookie, preventing them from refreshing the short-lived JWT without logging in again.", 
+			description = "Removes the user's session cookie, preventing them from refreshing the short-lived JWT without logging in again.",
+			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
 					@ApiResponse(
 							responseCode = "204", 
