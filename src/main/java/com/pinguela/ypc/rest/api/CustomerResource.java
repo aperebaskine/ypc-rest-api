@@ -122,6 +122,30 @@ public class CustomerResource {
 
 		return buildNewLoginResponse(context, customer);
 	}
+	
+	@POST
+	@Path("customers/logout")
+	@Operation(
+			method = "POST",
+			operationId = "logoutCustomer",
+			description = "Removes the user's session cookie, preventing them from refreshing the short-lived JWT without logging in again.", 
+			responses = {
+					@ApiResponse(
+							responseCode = "204", 
+							description = "Successfully logged out"
+							),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Caller is unauthenticated"
+							)
+			})
+	public Response logout(
+			@Context ContainerRequestContext context
+			) {
+		return Response.status(Status.NO_CONTENT)
+				.cookie(CookieUtils.expiredCookie(context, SessionCookieConfig.getInstance()))
+				.build();
+	}
 
 	@POST
 	@Public
