@@ -207,7 +207,13 @@ public class CustomerResource {
 			responses = {
 					@ApiResponse(
 							responseCode = "200", 
-							description = "Successfully initialized code flow, returned consent screen URL"
+							description = "Successfully initialized code flow, returned consent screen URL",
+							content = @Content(
+									mediaType = MediaType.TEXT_PLAIN,
+									schema = @Schema(
+											type = "string"
+											)
+									)
 							)
 			})
 	public Response oauthAuthorize(
