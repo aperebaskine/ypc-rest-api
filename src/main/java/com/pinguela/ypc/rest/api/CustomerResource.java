@@ -243,8 +243,7 @@ public class CustomerResource {
 			@FormParam("provider") 
 			@DefaultValue("google") 
 			@Parameter(
-					description = "Reserved for future use",
-					hidden = true
+					description = "Reserved for future use"
 					)
 			String provider,
 			@Context ContainerRequestContext requestContext
