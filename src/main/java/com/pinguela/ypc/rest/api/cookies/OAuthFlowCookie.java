@@ -9,7 +9,6 @@ import jakarta.ws.rs.core.NewCookie.SameSite;
  */
 public enum OAuthFlowCookie implements CookieConfiguration {
 	PROVIDER("__Secure-oauth_provider"),
-	REDIRECT_TO("__Secure-oauth_redirect_to"),
 	CODE_VERIFIER("__Secure-oauth_code_verifier"),
 	NONCE("__Secure-oauth_nonce");
 	

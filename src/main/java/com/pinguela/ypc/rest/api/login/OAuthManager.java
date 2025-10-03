@@ -62,6 +62,8 @@ public class OAuthManager {
 
 	private static final String CLIENT_ID = ConfigManager.getParameter("oauth.google.client_id");
 	private static final String CLIENT_SECRET = ConfigManager.getParameter("oauth.google.client_secret");
+	
+	public static final String APP_BASE_PATH = ConfigManager.getParameter("oauth.redirect.customer.base_path");
 
 	private static final Algorithm STATE_ALGORITHM = AlgorithmFactory.createAlgorithm();
 	private static final JWTVerifier STATE_VERIFIER = JWT.require(STATE_ALGORITHM)
@@ -119,7 +121,7 @@ public class OAuthManager {
 	 * @param requestContext The current request
 	 * @return An object containing the redirect URL to the consent screen and the cookies to set in the response
 	 */
-	public OAuthResponseData initAuthFlow(String provider, String redirectTo, ContainerRequestContext requestContext) {
+	public OAuthResponseData initAuthFlow(String provider, ContainerRequestContext requestContext) {
 		OAuth20Service oauthService = getOrBuildOAuthService(requestContext);
 		UriInfo uriInfo = requestContext.getUriInfo();
 
@@ -128,7 +130,6 @@ public class OAuthManager {
 		Date expiry = Date.from(Instant.now().plus(5, ChronoUnit.MINUTES));
 
 		URI baseUri = uriInfo.getBaseUri();
-		String finalRedirect = baseUri.resolve(redirectTo).toString();
 
 		String state = JWT.create()
 				.withSubject(nonce)
@@ -147,7 +148,6 @@ public class OAuthManager {
 
 		OAuthResponseData redirectData = new OAuthResponseData(baseUri)
 				.withCookie(OAuthFlowCookie.PROVIDER, provider)
-				.withCookie(OAuthFlowCookie.REDIRECT_TO, finalRedirect.toString())
 				.withCookie(OAuthFlowCookie.CODE_VERIFIER, pkce.getCodeVerifier())
 				.withCookie(OAuthFlowCookie.NONCE, nonce)
 				.withUrl(authUrl);
@@ -176,17 +176,16 @@ public class OAuthManager {
 		DecodedJWT idToken = idTokenVerifier.verifyJwt(provider, accessToken.getOpenIdToken());
 
 		Customer customer = findOrRegisterCustomer(idToken);
+		URI appUri = uriInfo.getBaseUri().resolve(APP_BASE_PATH);
 		Session session = new Session(customer, SessionType.OAUTH);
 		
 		session.setProperty("provider", provider);
 		session.setProperty("refresh_token", accessToken.getRefreshToken());
 
-		String redirectTo = requiredCookie(cookies, OAuthFlowCookie.REDIRECT_TO.getName());
-
 		return new OAuthResponseData(uriInfo.getBaseUri())
 				.withCookie(SessionCookieConfig.getInstance(), session.encode(Duration.ofDays(14)))
 				.withExpiredAuthFlowCookies()
-				.withUrl(redirectTo);
+				.withUrl(appUri.toString());
 	}
 
 	private void validateState(MultivaluedMap<String, String> queryParams, Map<String, Cookie> cookies) throws ValidationException {

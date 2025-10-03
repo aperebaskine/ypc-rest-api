@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.pinguela.InvalidLoginCredentialsException;
 import com.pinguela.YPCException;
-import com.pinguela.yourpc.config.ConfigManager;
 import com.pinguela.yourpc.model.Customer;
 import com.pinguela.yourpc.service.CustomerService;
 import com.pinguela.yourpc.service.impl.CustomerServiceImpl;
@@ -248,15 +247,9 @@ public class CustomerResource {
 					hidden = true
 					)
 			String provider,
-			@FormParam("redirectTo") @NotNull @DefaultValue("/") String redirectTo,
 			@Context ContainerRequestContext requestContext
 			) throws URISyntaxException {
-
-		if (!isValidRedirectUri(redirectTo)) {
-			throw new WebApplicationException(Status.BAD_REQUEST);
-		}
-
-		OAuthResponseData responseData = oauthManager.initAuthFlow("google", redirectTo, requestContext);
+		OAuthResponseData responseData = oauthManager.initAuthFlow("google", requestContext);
 
 		return Response
 				.ok(responseData.getUrl())
@@ -288,15 +281,6 @@ public class CustomerResource {
 				.location(redirectUri)
 				.cookie(responseData.getCookies().toArray(new NewCookie[0]))
 				.build();
-	}
-
-	private boolean isValidRedirectUri(String redirectUri) {
-		if (ConfigManager.isDebug()) { // Allows localhost absolute URLs
-			return true;
-		}
-
-		URI uri = URI.create(redirectUri);
-		return !uri.isAbsolute(); // Disallow redirects to other domains
 	}
 
 	@GET
