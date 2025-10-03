@@ -1,6 +1,7 @@
 package com.pinguela.ypc.rest.api.filter;
 
 import java.io.IOException;
+import java.net.URI;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -17,16 +18,25 @@ public class CORSFilter implements ContainerResponseFilter {
 	@Override
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
 			throws IOException {
-		
+
 		MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+		String origin = requestContext.getHeaderString(org.glassfish.jersey.http.HttpHeaders.ORIGIN);
 		
-		// TODO: Dynamically resolve allowed origins
-		headers.add("Access-Control-Allow-Origin", "http://localhost:4200");
-        headers.add("Access-Control-Allow-Headers",
-                "CSRF-Token, X-Requested-By, Authorization, Content-Type");
-        headers.add("Access-Control-Allow-Credentials", "true");
-        headers.add("Access-Control-Allow-Methods",
-                "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+		if (origin == null) {
+			return;
+		}
+		
+		URI baseUri = requestContext.getUriInfo().getBaseUri();
+		URI originUri = URI.create(origin);
+
+		if (baseUri.getHost().equals(originUri.getHost())) {
+			headers.add("Access-Control-Allow-Origin", origin);
+			headers.add("Access-Control-Allow-Headers",
+					"CSRF-Token, X-Requested-By, Authorization, Content-Type");
+			headers.add("Access-Control-Allow-Credentials", "true");
+			headers.add("Access-Control-Allow-Methods",
+					"GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD");
+		}
 	}
-	
+
 }
