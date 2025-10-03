@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.pinguela.ypc.rest.api.cookies.CookieConfiguration;
 import com.pinguela.ypc.rest.api.cookies.OAuthFlowCookie;
-import com.pinguela.ypc.rest.api.util.PathUtils;
+import com.pinguela.ypc.rest.api.util.HTTPUtils;
 
 import jakarta.ws.rs.core.NewCookie;
 
@@ -54,7 +54,7 @@ public class OAuthResponseData {
 	private void addCookie(CookieConfiguration config, String value, boolean isExpired) {
 		Date expiry = isExpired ? new Date(0) : Date.from(now.plusSeconds(config.getMaxAge()));
 		NewCookie newCookie = new NewCookie.Builder(config.getName())
-				.path(PathUtils.createPath(config.getPath()))
+				.path(HTTPUtils.createPath(config.getPath()))
 				.value(value)
 				.expiry(expiry)
 				.httpOnly(config.isHttpOnly())

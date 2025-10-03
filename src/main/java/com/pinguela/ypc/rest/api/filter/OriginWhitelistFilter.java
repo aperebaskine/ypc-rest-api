@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.http.HttpHeaders;
 
-import com.pinguela.ypc.rest.api.util.PathUtils;
+import com.pinguela.ypc.rest.api.util.HTTPUtils;
 
 @Provider
 @PreMatching
@@ -33,7 +33,7 @@ public class OriginWhitelistFilter implements ContainerRequestFilter {
 			return;
 		}
 		
-		if (!PathUtils.isOriginAllowed(origin)) {
+		if (!HTTPUtils.isOriginAllowed(origin)) {
 			logger.info("Received request with non-allowed origin {}.", origin);
 			throw new WebApplicationException(Status.BAD_REQUEST);
 		}

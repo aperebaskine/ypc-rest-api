@@ -24,7 +24,7 @@ import com.pinguela.ypc.rest.api.login.OAuthManager;
 import com.pinguela.ypc.rest.api.model.CustomerDTOMixin;
 import com.pinguela.ypc.rest.api.model.OAuthResponseData;
 import com.pinguela.ypc.rest.api.model.Session;
-import com.pinguela.ypc.rest.api.util.CookieUtils;
+import com.pinguela.ypc.rest.api.util.HTTPUtils;
 import com.pinguela.ypc.rest.api.util.ResponseWrapper;
 import com.pinguela.ypc.rest.api.validation.Validators;
 
@@ -140,7 +140,7 @@ public class CustomerResource {
 			})
 	public Response logout() {
 		return Response.status(Status.NO_CONTENT)
-				.cookie(CookieUtils.expiredCookie(SessionCookieConfig.getInstance()))
+				.cookie(HTTPUtils.expiredCookie(SessionCookieConfig.getInstance()))
 				.build();
 	}
 
@@ -207,7 +207,7 @@ public class CustomerResource {
 
 		SessionCookieConfig config = SessionCookieConfig.getInstance();
 		Duration cookieDuration = Duration.ofSeconds(config.getMaxAge());
-		NewCookie sessionCookie = CookieUtils.newCookie(config, session.encode(cookieDuration));
+		NewCookie sessionCookie = HTTPUtils.newCookie(config, session.encode(cookieDuration));
 
 		return Response.ok(bearerToken)
 				.cookie(sessionCookie)
