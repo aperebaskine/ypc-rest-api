@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.http.HttpHeaders;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -123,13 +124,11 @@ public class OAuthManager {
 	 */
 	public OAuthResponseData initAuthFlow(String provider, ContainerRequestContext requestContext) {
 		OAuth20Service oauthService = getOrBuildOAuthService(requestContext);
-		UriInfo uriInfo = requestContext.getUriInfo();
 
 		PKCE pkce = generatePkce();
 		String nonce = UUID.randomUUID().toString();
 		Date expiry = Date.from(Instant.now().plus(5, ChronoUnit.MINUTES));
-
-		URI baseUri = uriInfo.getBaseUri();
+		String origin = requestContext.getHeaderString(HttpHeaders.ORIGIN);
 
 		String state = JWT.create()
 				.withSubject(nonce)
@@ -146,8 +145,9 @@ public class OAuthManager {
 				.pkce(pkce)
 				.build();
 
-		OAuthResponseData redirectData = new OAuthResponseData(baseUri)
+		OAuthResponseData redirectData = new OAuthResponseData()
 				.withCookie(OAuthFlowCookie.PROVIDER, provider)
+				.withCookie(OAuthFlowCookie.ORIGIN, origin)
 				.withCookie(OAuthFlowCookie.CODE_VERIFIER, pkce.getCodeVerifier())
 				.withCookie(OAuthFlowCookie.NONCE, nonce)
 				.withUrl(authUrl);
@@ -176,16 +176,18 @@ public class OAuthManager {
 		DecodedJWT idToken = idTokenVerifier.verifyJwt(provider, accessToken.getOpenIdToken());
 
 		Customer customer = findOrRegisterCustomer(idToken);
-		URI appUri = uriInfo.getBaseUri().resolve(APP_BASE_PATH);
+
+		String origin = requiredCookie(cookies, OAuthFlowCookie.ORIGIN.getName());
+		String appUri = URI.create(origin).resolve(APP_BASE_PATH).toString();
 		Session session = new Session(customer, SessionType.OAUTH);
 		
 		session.setProperty("provider", provider);
 		session.setProperty("refresh_token", accessToken.getRefreshToken());
 
-		return new OAuthResponseData(uriInfo.getBaseUri())
+		return new OAuthResponseData()
 				.withCookie(SessionCookieConfig.getInstance(), session.encode(Duration.ofDays(14)))
 				.withExpiredAuthFlowCookies()
-				.withUrl(appUri.toString());
+				.withUrl(appUri);
 	}
 
 	private void validateState(MultivaluedMap<String, String> queryParams, Map<String, Cookie> cookies) throws ValidationException {

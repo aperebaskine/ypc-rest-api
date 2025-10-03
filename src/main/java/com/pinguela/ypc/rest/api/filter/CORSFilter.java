@@ -1,7 +1,8 @@
 package com.pinguela.ypc.rest.api.filter;
 
 import java.io.IOException;
-import java.net.URI;
+
+import org.glassfish.jersey.http.HttpHeaders;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -19,24 +20,20 @@ public class CORSFilter implements ContainerResponseFilter {
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
 			throws IOException {
 
-		MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-		String origin = requestContext.getHeaderString(org.glassfish.jersey.http.HttpHeaders.ORIGIN);
-		
+		String origin = requestContext.getHeaderString(HttpHeaders.ORIGIN);
+
 		if (origin == null) {
 			return;
 		}
-		
-		URI baseUri = requestContext.getUriInfo().getBaseUri();
-		URI originUri = URI.create(origin);
 
-		if (baseUri.getHost().equals(originUri.getHost())) {
-			headers.add("Access-Control-Allow-Origin", origin);
-			headers.add("Access-Control-Allow-Headers",
-					"CSRF-Token, X-Requested-By, Authorization, Content-Type");
-			headers.add("Access-Control-Allow-Credentials", "true");
-			headers.add("Access-Control-Allow-Methods",
-					"GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD");
-		}
+		MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+
+		headers.putSingle("Access-Control-Allow-Origin", origin);
+		headers.putSingle("Access-Control-Allow-Headers",
+				"CSRF-Token, X-Requested-By, Authorization, Content-Type");
+		headers.putSingle("Access-Control-Allow-Credentials", "true");
+		headers.putSingle("Access-Control-Allow-Methods",
+				"GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD");
 	}
 
 }

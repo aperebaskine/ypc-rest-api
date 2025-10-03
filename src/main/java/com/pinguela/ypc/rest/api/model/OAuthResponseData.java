@@ -1,6 +1,5 @@
 package com.pinguela.ypc.rest.api.model;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,12 +16,10 @@ public class OAuthResponseData {
 	private String nextUrl;
 	private List<NewCookie> cookies;
 
-	private URI baseUri;
 	private Instant now;
 
-	public OAuthResponseData(URI baseUri) {
+	public OAuthResponseData() {
 		this.cookies = new ArrayList<NewCookie>();
-		this.baseUri = baseUri;
 		this.now = Instant.now();
 	}
 
@@ -57,7 +54,7 @@ public class OAuthResponseData {
 	private void addCookie(CookieConfiguration config, String value, boolean isExpired) {
 		Date expiry = isExpired ? new Date(0) : Date.from(now.plusSeconds(config.getMaxAge()));
 		NewCookie newCookie = new NewCookie.Builder(config.getName())
-				.path(PathUtils.createPath(baseUri, config.getPath()))
+				.path(PathUtils.createPath(config.getPath()))
 				.value(value)
 				.expiry(expiry)
 				.httpOnly(config.isHttpOnly())

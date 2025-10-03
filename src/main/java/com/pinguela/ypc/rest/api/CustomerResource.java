@@ -104,8 +104,7 @@ public class CustomerResource {
 			})
 	public Response login(
 			@FormParam("email") @Email String email,
-			@FormParam("password") String password,
-			@Context ContainerRequestContext context
+			@FormParam("password") String password
 			) {
 
 		Customer customer;
@@ -119,7 +118,7 @@ public class CustomerResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
-		return buildNewLoginResponse(context, customer);
+		return buildNewLoginResponse(customer);
 	}
 
 	@POST
@@ -139,11 +138,9 @@ public class CustomerResource {
 							description = "Caller is unauthenticated"
 							)
 			})
-	public Response logout(
-			@Context ContainerRequestContext context
-			) {
+	public Response logout() {
 		return Response.status(Status.NO_CONTENT)
-				.cookie(CookieUtils.expiredCookie(context, SessionCookieConfig.getInstance()))
+				.cookie(CookieUtils.expiredCookie(SessionCookieConfig.getInstance()))
 				.build();
 	}
 
@@ -177,8 +174,7 @@ public class CustomerResource {
 			@FormParam("docNumber") String documentNumber,
 			@FormParam("phoneNumber") String phoneNumber,
 			@FormParam("email") @NotNull String email,
-			@FormParam("password") @NotNull String password,
-			@Context ContainerRequestContext context
+			@FormParam("password") @NotNull String password
 			) {
 		return new ParameterProcessor()
 				.validate("email", email, Validators.isUnusedEmail())
@@ -200,18 +196,18 @@ public class CustomerResource {
 						throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 					}
 
-					return buildNewLoginResponse(context, createdCustomer);
+					return buildNewLoginResponse(createdCustomer);
 				});
 	}
 
-	private Response buildNewLoginResponse(ContainerRequestContext context, Customer customer) {
+	private Response buildNewLoginResponse(Customer customer) {
 		Session session = new Session(customer, SessionType.CREDENTIALS);
 
 		String bearerToken = session.encode(Duration.ofMinutes(10));
 
 		SessionCookieConfig config = SessionCookieConfig.getInstance();
 		Duration cookieDuration = Duration.ofSeconds(config.getMaxAge());
-		NewCookie sessionCookie = CookieUtils.newCookie(context, config, session.encode(cookieDuration));
+		NewCookie sessionCookie = CookieUtils.newCookie(config, session.encode(cookieDuration));
 
 		return Response.ok(bearerToken)
 				.cookie(sessionCookie)

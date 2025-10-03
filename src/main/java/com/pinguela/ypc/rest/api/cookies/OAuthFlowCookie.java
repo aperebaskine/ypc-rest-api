@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.NewCookie.SameSite;
  * Configuration for short-lived, single-use cookies used during the authorization code flow.
  */
 public enum OAuthFlowCookie implements CookieConfiguration {
+	ORIGIN("__Secure-oauth_request_origin"),
 	PROVIDER("__Secure-oauth_provider"),
 	CODE_VERIFIER("__Secure-oauth_code_verifier"),
 	NONCE("__Secure-oauth_nonce");
