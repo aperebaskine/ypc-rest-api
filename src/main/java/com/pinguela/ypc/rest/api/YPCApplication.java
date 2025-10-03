@@ -23,11 +23,15 @@ import jakarta.ws.rs.ApplicationPath;
 		servers = {
 				@Server(
 						url = "https://informaticapinguela.es/ypc-rest-api/", 
-						description = "Production server for YPC REST API"
+						description = "Production server"
 						),
 				@Server(
 						url = "http://localhost:8080/ypc-rest-api/", 
 						description = "Local testing server"
+						),
+				@Server(
+						url = "http://localhost:4200/ypc-rest-api/", 
+						description = "Angular proxy for local testing server"
 						)
 		},
 		tags = {
