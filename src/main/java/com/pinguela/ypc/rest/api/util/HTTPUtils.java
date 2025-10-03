@@ -35,9 +35,22 @@ public class HTTPUtils {
 		String path = createPath(config.getPath());
 		return new NewCookie.Builder(config.getName())
 				.value(value)
-				.domain(config.getDomain())
 				.path(path)
+				.domain(config.getDomain())
 				.maxAge(config.getMaxAge())
+				.httpOnly(config.isHttpOnly())
+				.secure(config.isSecure())
+				.sameSite(config.getSameSite())
+				.build();
+	}
+	
+	public static NewCookie newCookieWithExpiry(CookieConfiguration config, String value) {
+		String path = createPath(config.getPath());
+		return new NewCookie.Builder(config.getName())
+				.value(value)
+				.path(path)
+				.domain(config.getDomain())
+				.expiry(config.getExpiry())
 				.httpOnly(config.isHttpOnly())
 				.secure(config.isSecure())
 				.sameSite(config.getSameSite())
