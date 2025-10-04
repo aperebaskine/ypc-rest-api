@@ -23,7 +23,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Public
-@Path("/categories")
+@Path("/")
 @Tag(name = "product")
 @ApiResponses(
 		@ApiResponse(
@@ -40,7 +40,7 @@ public class CategoryResource {
 	}
 
 	@GET
-	@Path("{locale}")
+	@Path("/categories/{locale}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
