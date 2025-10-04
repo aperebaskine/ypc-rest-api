@@ -45,7 +45,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/attributes/{locale}/{attributeId:\\d+}")
+	@Path("/attributes/{locale:[a-z]{2}-[A-Z]{2}}/{attributeId:[0-9]+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -80,7 +80,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/attributes/{locale}/{attributeName}")
+	@Path("/attributes/{locale:[a-z]{2}-[A-Z]{2}}/{attributeName:.+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
@@ -116,7 +116,7 @@ public class AttributeResource {
 	}
 
 	@GET
-	@Path("/categories/{locale}/{categoryId:^\\d+$}/attributes")
+	@Path("/categories/{locale:[a-z]{2}-[A-Z]{2}}/{categoryId:[0-9]+}/attributes")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(
 			method = "GET",
