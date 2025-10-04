@@ -27,6 +27,10 @@ public class HTTPUtils {
 		return ALLOWED_ORIGINS.contains(origin);
 	}
 	
+	public static String createUrl(String path) {
+		return API_BASE_URL.resolve(path).toString();
+	}
+	
 	public static String createPath(String path) {
 		return API_BASE_URL.resolve(path).getPath();
 	}
