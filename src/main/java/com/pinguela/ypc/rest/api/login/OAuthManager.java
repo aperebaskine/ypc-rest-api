@@ -47,6 +47,7 @@ import com.pinguela.ypc.rest.api.exception.ValidationException;
 import com.pinguela.ypc.rest.api.internal.AlgorithmFactory;
 import com.pinguela.ypc.rest.api.model.OAuthResponseData;
 import com.pinguela.ypc.rest.api.model.Session;
+import com.pinguela.ypc.rest.api.util.HTTPUtils;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Cookie;
@@ -92,13 +93,12 @@ public class OAuthManager {
 	private OAuth20Service getOrBuildOAuthService(ContainerRequestContext context) {
 
 		if (this.oauthService == null) {
-			URI baseUri = context.getUriInfo().getBaseUri();
-			URI callbackUri = baseUri.resolve(Paths.OAUTH_CALLBACK);
+			String callbackUrl = HTTPUtils.createUrl(Paths.OAUTH_CALLBACK);
 
 			oauthService = new ServiceBuilder(CLIENT_ID)
 					.apiSecret(CLIENT_SECRET)
 					.defaultScope(SCOPES)
-					.callback(callbackUri.toString())
+					.callback(callbackUrl)
 					.build(GoogleApi20.instance());
 		}
 
