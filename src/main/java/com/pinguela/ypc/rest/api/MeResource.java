@@ -365,7 +365,7 @@ public class MeResource {
 					Integer customerId = AuthUtils.getUserId(securityContext);
 					Address current = this.addressService.findById(customerId);
 
-					if (current.getCustomerId().equals(customerId)) {
+					if (!current.getCustomerId().equals(customerId)) {
 						throw new WebApplicationException(Status.FORBIDDEN);
 					}
 
